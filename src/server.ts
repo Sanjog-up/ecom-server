@@ -1,6 +1,6 @@
 import app from "./app";
 import connectDatabase from "./config/db.config"
-const DB_URI = "mongoose://localhost:team_12"
+const DB_URI = "mongodb://localhost/team_12"
 
 
 const PORT = 8080;

@@ -9,7 +9,7 @@
     // See also https://aka.ms/tsconfig/module
     "module": "commonjs",
     "target": "es2020",
-    "types": [],
+    // "types": [],
     
 
 
@@ -18,5 +18,5 @@
     "skipLibCheck": true,
     "esModuleInterop": true
   },
-  "inclue": ["src"]
+  "include": ["src"]
 }
