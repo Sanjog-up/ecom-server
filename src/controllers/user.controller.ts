@@ -68,3 +68,34 @@ export const getById = async(req: Request,
         })
     }
 }
+
+export const deleteUser = async(req: Request, res: Response, next: NextFunction)=> {
+    try {
+        //* user id 
+        const { id } = req.params;
+
+        //* db query
+        const user = await User.findOne({ _id: id});
+        //* if user not found 
+        if(!user){
+        const error: any = new Error("User not found");
+        error.statusCode = 404;
+        error.status = "fail";
+        throw error;}
+        //* success response
+        res.status(200).json({
+            message: `User ${id} deleted`,
+            data: User,
+        succedd: true,
+        status: "success"
+        });
+    } catch (error:any) {
+        next({
+            message: error?.message || "Something went wrong",
+            status: error?.status || "error",
+            success: false,
+            data: null,
+            statusCode: error?.statusCode || 500,
+        })
+    }
+}
