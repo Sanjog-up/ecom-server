@@ -1,5 +1,6 @@
 import User from "../models/user.model";
 import { NextFunction, Request, Response } from "express";
+import { Role } from "../types/enum.types";
 
 //! register
 export const register = async (
@@ -28,16 +29,17 @@ export const register = async (
       throw error;
     }
     //* create User instance
-    const user = new User({ full_name, email, password, phone });
+    const user = new User({ full_name, email, password, phone, role: Role.USER});
 
     //! handle profile image
     //* save user
     await user.save();
+    const userData = user.toObject({ getters: true});
 
     //* success response
     res.status(201).json({
       message: "Account created",
-      data: user,
+      data: userData,
       success: true,
       status: "success",
     });
@@ -94,7 +96,7 @@ export const login = async (
     //* success response
     res.status(201).json({
       message: "Login successful",
-      data: user,
+      data: userData,
       success: true,
       status: "success",
     });

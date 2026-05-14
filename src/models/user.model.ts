@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { Role } from "../types/enum.types";
+console.log("Role values:", Object.values(Role));
 
 const userSchema = new mongoose.Schema(
   {
@@ -27,9 +28,8 @@ const userSchema = new mongoose.Schema(
     //! role
     role: {
       type: String,
-      enum: Object.values(Role)
-      ,
-      default: "User",
+      enum: Object.values(Role),
+      default: Role.USER,
     },
     photo: {},
   },
