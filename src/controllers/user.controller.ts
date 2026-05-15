@@ -9,8 +9,10 @@ export const getAll = async (req: Request,
 ) => {
     try{
   const filter = {};
+
 //  * get all users query
 const users = await User.find(filter);
+
 //* success response
 res.status(200).json({
     message: "All users fetched",

@@ -1,80 +1,62 @@
 import User from "../models/user.model";
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, Request, RequestHandler, Response } from "express";
 import { Role } from "../types/enum.types";
+import AppError from "../utils/appError.utils";
+import { sendResponse } from "../utils/sendResponse.utils";
+import { catchAsync } from "../utils/catchAsync.utils";
+
 
 //! register
-export const register = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
+export const register = catchAsync(async (req: Request,res: Response) => {
     const { full_name, email, password, phone } = req.body;
     if (!full_name) {
-      const error: any = new Error("full_name is required ");
-      error.statusCode = 404;
-      error.status = "fail";
-      throw error;
+      throw new AppError("full_name is required", 404);
     }
     if (!email) {
-      const error: any = new Error("email is required");
-      error.statusCode = 404;
-      error.status = "fail";
-      throw error;
+      throw new AppError("email is required", 404);
     }
     if (!password) {
-      const error: any = new Error("password is required");
-      error.statusCode = 404;
-      error.status = "fail";
-      throw error;
+      throw new AppError("password is required", 404);
     }
     //* create User instance
     const user = new User({ full_name, email, password, phone, role: Role.USER});
 
     //! handle profile image
+
+
     //* save user
     await user.save();
-    const userData = user.toObject({ getters: true});
+   
 
     //* success response
-    res.status(201).json({
+    sendResponse(res, {
       message: "Account created",
-      data: userData,
-      success: true,
-      status: "success",
+      data: user,
+      statusCode: 201,
     });
-  } catch (error: any) {
-    next({
-      message: error?.message || "Something went wrong",
-      status: error?.status || "error",
-      success: false,
-      data: null,
-      statusCode: error?.statusCode || 500,
-    });
-  }
-};
+  }); 
 
 //! login
-export const login = async (
+export const login = catchAsync(async (
   req: Request,
   res: Response,
-  next: NextFunction,
 ) => {
   //* login
-  try {
     const { email, password } = req.body;
 
     if (!email) {
-      const error: any = new Error("email is required");
-      error.statusCode = 404;
-      error.status = "fail";
-      throw error;
+    //   const error: any = new Error("email is required");
+    //   error.statusCode = 404;
+    //   error.status = "fail";
+    //   throw error;
+     throw new AppError("email is required", 404);
     }
     if (!password) {
-      const error: any = new Error("password is required");
-      error.statusCode = 404;
-      error.status = "fail";
-      throw error;
+      // const error: any = new Error("password is required");
+      // error.statusCode = 404;
+      // error.status = "fail";
+      // throw error;
+       throw new AppError("password is required", 404);
     }
     //* user exists or not/find user by email
     const user = await User.findOne({ email: email });
@@ -94,41 +76,15 @@ export const login = async (
       throw error;
     }
     //* success response
-    res.status(201).json({
-      message: "Login successful",
-      data: userData,
-      success: true,
-      status: "success",
-    });
-  } catch (error: any) {
-    next({
-      message: error?.message || "Something went wrong",
-      status: error?.status || "error",
-      success: false,
-      data: null,
-      statusCode: error?.statusCode || 500,
-    });
-  }
-};
+    sendResponse(res,{
+       message: "Login successful",
+      data: user,
+      statusCode: 201,
+  });
+});
 
 //! update profile
-export const updateProfile = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  //* update profile
-  try {
-  } catch (error: any) {
-    next({
-      message: error?.message || "Something went wrong",
-      status: error?.status || "error",
-      success: false,
-      data: null,
-      statusCode: error?.statusCode || 500,
-    });
-  }
-};
+
 //! get profile
 
 //! change password

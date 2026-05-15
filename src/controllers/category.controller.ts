@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { Category } from "../models/category";
+import { Category } from "..models/category.model";
 
 
 //! get all
@@ -13,6 +13,8 @@ export const getAllCategories = async (req:Request, res: Response) => {
 
         if(req.query.status) filter.status = req.query.status;
         if(req.query.parentId) filter.parentId = req.query.parentId;
+
+        if(req.query)
     } catch (error) {
         
     }
