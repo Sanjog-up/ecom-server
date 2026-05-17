@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import userRoutes from "./routes/user.routes";
 import authRoutes from "./routes/auth.routes";
+import categoryRoutes from "./routes/category.routes";
 import { errorHandler } from "./middlewares/errorHandler.middlewares";
 
 
@@ -27,6 +28,8 @@ app.get("/", (req: Request, res: Response) =>
 //! using routes
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/auth/register", authRoutes);
+app.use("/api/v1/categories", categoryRoutes);
+
 //! error handler
  app.use(errorHandler);
 
