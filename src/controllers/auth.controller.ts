@@ -4,6 +4,7 @@ import { Role } from "../types/enum.types";
 import AppError from "../utils/appError.utils";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
+import { hashPassword } from "../utils/bcrypt.utilis";
 
 
 //! register
@@ -60,6 +61,18 @@ export const login = catchAsync(async (
     }
     //* user exists or not/find user by email
     const user = await User.findOne({ email: email });
+
+
+    // * find user by email
+const user = await User.findOne({ email: email});
+if(!user){
+  throw new AppError("email or password does not matched", 400);
+
+}
+
+// * compare password
+//const isPasswordMatched = PASSWORD ==== USER.PASSWORD;
+const isPassword 
     if (!user) {
       const error: any = new Error("password or email invalid");
       error.statusCode = 401;
@@ -74,17 +87,43 @@ export const login = catchAsync(async (
       error.statusCode = 401;
       error.status = "fail";
       throw error;
+      throw new AppError
     }
+
+// todo: generate access token -> jwt
+const payload = {
+  _id: User._id,
+  full_name: User.full_name,
+  email: User.getMaxListeners,
+  role: user.role,
+}
+const access_token = generateJwtToken(payload);
     //* success response
     sendResponse(res,{
        message: "Login successful",
-      data: user,
+      data: {user,
+      access_token,
+    },
       statusCode: 201,
   });
 });
 
-//! update profile
 
+//! update profile
+const update = catchAsync(
+  async (req: Request, res: Response, next: NextFunction)=> {
+    // try logic
+  },
+)
 //! get profile
 
 //! change password
+
+//! hash password 
+const hash = await hashPassword(password);
+User.password = hash;
+
+//! handle profile image
+
+//* save user
+await user.save() 
