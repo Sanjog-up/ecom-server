@@ -4,7 +4,7 @@ import mongoose  from "mongoose";
 import ENV_CONFIG from "../config/env.config";
 
 type TPayload = {
-    _id: mongoose.Schema.Types.ObjectId;
+    _id: mongoose.Types.ObjectId;
     full_name?: string;
     role: Role;
     email: string;
@@ -12,7 +12,7 @@ type TPayload = {
 
 //! generate access token
 
-export const generateToken = (payload) => {
+export const generateJwtToken = (payload: TPayload) => {
     try {
         const access_token = jwt.sign(payload, ENV_CONFIG.jwt_secret, {
             expiresIn: ENV_CONFIG.jwt_expiry as any,

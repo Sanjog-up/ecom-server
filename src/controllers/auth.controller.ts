@@ -1,10 +1,11 @@
 import User from "../models/user.model";
 import { NextFunction, Request, RequestHandler, Response } from "express";
-import { Role } from "../types/enum.types";
+// import { Role } from "../types/enum.types";
 import AppError from "../utils/appError.utils";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
-import { hashPassword } from "../utils/bcrypt.utilis";
+import { comparePassword, hashPassword } from "../utils/bcrypt.utilis";
+import { generateJwtToken } from "../utils/jwt.utilis";
 
 
 //! register
@@ -20,7 +21,9 @@ export const register = catchAsync(async (req: Request,res: Response) => {
       throw new AppError("password is required", 404);
     }
     //* create User instance
-    const user = new User({ full_name, email, password, phone, role: Role.USER});
+    const user = new User({ full_name, email, password, phone });
+    user.password = hash;
+
 
     //! handle profile image
 
@@ -42,7 +45,9 @@ export const login = catchAsync(async (
   req: Request,
   res: Response,
 ) => {
+  
   //* login
+  //* email password <- req.body 
     const { email, password } = req.body;
 
     if (!email) {
@@ -59,8 +64,6 @@ export const login = catchAsync(async (
       // throw error;
        throw new AppError("password is required", 404);
     }
-    //* user exists or not/find user by email
-    const user = await User.findOne({ email: email });
 
 
     // * find user by email
@@ -72,32 +75,22 @@ if(!user){
 
 // * compare password
 //const isPasswordMatched = PASSWORD ==== USER.PASSWORD;
-const isPassword 
-    if (!user) {
-      const error: any = new Error("password or email invalid");
-      error.statusCode = 401;
-      error.status = "fail";
-      throw error;
-    }
+const isPasswordMathed = await comparePassword(password, user.password);
 
-    //* pasd matches or not
-    const isPasswordMatched = password === user.password;
-    if (!isPasswordMatched) {
-      const error: any = new Error("password or email invalid");
-      error.statusCode = 401;
-      error.status = "fail";
-      throw error;
-      throw new AppError
-    }
+if(!isPasswordMathed){
+  throw new AppError("email or password does not match", 400);
+}
 
 // todo: generate access token -> jwt
 const payload = {
-  _id: User._id,
-  full_name: User.full_name,
+  _id: user._id,
+  full_name: user.full_name,
   email: User.getMaxListeners,
   role: user.role,
 }
 const access_token = generateJwtToken(payload);
+
+
     //* success response
     sendResponse(res,{
        message: "Login successful",
@@ -110,9 +103,10 @@ const access_token = generateJwtToken(payload);
 
 
 //! update profile
-const update = catchAsync(
+export const update = catchAsync(
   async (req: Request, res: Response, next: NextFunction)=> {
-    // try logic
+  const { email } = req.body;
+
   },
 )
 //! get profile
