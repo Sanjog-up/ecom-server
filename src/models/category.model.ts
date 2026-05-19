@@ -1,7 +1,11 @@
 import mongoose from "mongoose";
 
+interface ICategorySchema extends Document{
+    name: string;
+    description?: string;
+}
 //! category schema
-const categorySchema = new mongoose.Schema(
+const categorySchema = new mongoose.Schema<ICategorySchema>(
 {
     // name: require, description
     name: {
@@ -14,13 +18,14 @@ const categorySchema = new mongoose.Schema(
         description: {
             type: String,
             trim: true,
+            minLength: [24, "minimum 25 character is required"],
         }
     }, 
+    //todo: image 
     {timestamps: true },
 );
 
 //! model
 const Category = mongoose.model("category", categorySchema);
-
 export default Category;
 

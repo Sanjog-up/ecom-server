@@ -1,122 +1,101 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import  Category from "../models/category.model";
+import { catchAsync } from "../utils/catchAsync.utils";
+import { sendResponse } from "../utils/sendResponse.utils";
+import AppError from "../utils/appError.utils";
 
 
 //! get all
-export const getAllCategories = async (req:Request, res: Response) => {
-    try {
-        const page = parseInt (req.query.page as string) || 1;
-        const limit = parseInt(req.query.limit as string) || 10;
-        const skip = (page -1)* limit;
+export const getAll = catchAsync(async (req:Request, res: Response, next: NextFunction) => {
+   
+    const { id } = req.params;
 
-        const filter: any = {};
+        const categories = await Category.findOne({_id: id});
 
-        if(req.query.status) filter.status = req.query.status;
-        if(req.query.parentId) filter.parentId = req.query.parentId;
-
-        const categories = await Category.find(filter).skip(skip).limit(limit);
-        const total  = await Category.countDocuments(filter);
-
-        res.status(200).json({
+        sendResponse(res, {
             message: "categories fetched",
             data: categories,
-            total,
-            page,
-            limit,
-
+            statusCode: 200,
         });
-    } catch (error) {
-        res.status(500).json({message: "server error", error});
-    }
-} ;
-
+    });
 
 //! get by id
-export const getCategoryById = async (req:Request, res: Response) => {
-    try {
+export const getById = catchAsync(async (req:Request, res: Response) => {
+
         const { id } = req.params;
-        const category = await Category.findById(id);
+        const category = await Category.findOne({_id: id});
         if(!category){
-            res.status(404).json({ message: "category not found"});
-            return;
+           throw new AppError(`category ${id} not found`, 400)
         }
 
-        res.status(200).json({
-            message: "category fetched",
-            data: category,
-            
-        });
-    } catch (error) {
-        res.status(500).json({message: "server error", error});
-    }
-} ;
+     sendResponse(res, {
+        message: `category ${id} fetched`,
+        data:category,
+        statusCode: 200,
+     });
+    });
 
 //! create 
-export const createCategory = async (req:Request, res: Response) => {
-    try {
+export const createCategory = catchAsync(async (req:Request, res: Response) => {
+
         const { name, description } = req.body;
         if(!name){
-            res.status(400).json({message: "name is required" });
-            return;
+            throw new AppError("name is required", 400);
         }
+
         const category= new Category({ name, description });
+
+        // todo: handle image
+
+        //? save category 
         await category.save();
-        res.status(201).json({
+        
+        sendResponse(res, {
             message: "category created",
             data: category,
+            statusCode: 201,
     });
-    } catch (error) {
-        res.status(500).json({message: "server error", error});
-    }
-} ;
+    })
 
 
 //! update
-export const updateCategory = async (req: Request, res: Response) => {
-    try {
+export const updateCategory = catchAsync( async (req: Request, res: Response) => {
         const { id } = req.params;
         const { name, description } = req.body;
 
-        if(!name && !description){
-            res.status(400).json({ message: "name or descrption is required"});
-            return;
+
+        const category = await Category.findOne({_id: id });
+          if(!category){
+           throw new AppError(`category ${id} not found`, 404)
         }
 
-        const category = await Category.findByIdAndUpdate(id,
-            {name, description },
-            {new: true}
-        );
+        if(name) category.name = name;
+        if(description) category.description = description;
+   
+    //* save updated category to database
+    await category.save(); 
 
-        if(!category){
-            res.status(404).json({message: "category not found"});
-            return;
-        }
-
-        res.status(200).json({
-            message: "category updated",
-            data: category,
-        });
-    } catch (error) {
-        res.status(500).json({message: "server error", error});
-    }
-}
+    sendResponse(res,{
+        message: `caregory ${id} updated`,
+        data: category,
+        statusCode: 200
+    });
+     });
 
 //! delete 
-export const deleteCategory = async(req: Request, res: Response) =>{
-    try {
-        const { id }= req.params;
+export const deleteCategory = catchAsync(async(req: Request, res: Response) =>{        const { id }= req.params;
 
-        const category = await Category.findByIdAndDelete(id);
+        const category = await Category.findOne({_id: id});
 
         if(!category){
-            res.status(404).json({ message: "category not found"});
-            return;
+            throw new AppError(`category ${id} not found`, 400);
         }
-        res.status(200).json({
-            message: "category deleted",
-            data: category,
+        await category.deleteOne();
+
+        sendResponse
+        (res,{
+            message: `category ${id} deleted`,
+            data: null,
+            statusCode: 200,
         })
-    } catch (error) {
-        res.status(500).json({message: "server error", error});
-    }
-}
+});
