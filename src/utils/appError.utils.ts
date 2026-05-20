@@ -4,7 +4,7 @@ class AppError extends Error{
 
     statusCode: number;
     status: "error" | "success" | "fail";
-    success: "boolean";
+    success: boolean;
 
     constructor(message: string, statusCode: number ){
         super(message);

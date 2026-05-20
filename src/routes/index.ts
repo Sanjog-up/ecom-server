@@ -5,7 +5,7 @@ import categoryRoutes from "./category.routes";
 
 const router = express.Router();
 
-router.use("./auth", authRoutes);
+router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/categories", categoryRoutes);
 

@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Role } from "../types/enum.types";
 console.log("Role values:", Object.values(Role));
 
+// [profile_image]:{_id: path}
 const userSchema = new mongoose.Schema(
   {
     full_name: {
@@ -13,7 +14,7 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: [true, "email is required"],
-      unique: [true, "user already exists with provided email"],
+      unique: true,
       trim: true,
     },
     password: {
@@ -23,7 +24,7 @@ const userSchema = new mongoose.Schema(
     },
     phone: {
       type: String,
-      minLenght: [10],
+      minLength: [10, "phone must be 10 digits"],
     },
     //! role
     role: {
@@ -31,10 +32,25 @@ const userSchema = new mongoose.Schema(
       enum: Object.values(Role),
       default: Role.USER,
     },
-    photo: {},
+  
+  //! profile image:{path: ``,public_id:``}
+  profile_image:{
+    type: {
+      path:{
+        type: String,
+        required: true,
+      },
+      public_id: {
+        type: String,
+        required: true,
+      },
+    }
+  } ,
   },
   { timestamps: true },
-);
+
+)
+
 
 //! model
 const User = mongoose.model("user", userSchema);

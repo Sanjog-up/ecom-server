@@ -21,6 +21,7 @@ export const register = catchAsync(async (req: Request,res: Response) => {
       throw new AppError("password is required", 404);
     }
     //* create User instance
+    const hash = await hashPassword(password);
     const user = new User({ full_name, email, password, phone });
     user.password = hash;
 
@@ -85,7 +86,7 @@ if(!isPasswordMathed){
 const payload = {
   _id: user._id,
   full_name: user.full_name,
-  email: User.getMaxListeners,
+  email: user.email ,
   role: user.role,
 }
 const access_token = generateJwtToken(payload);
@@ -103,21 +104,21 @@ const access_token = generateJwtToken(payload);
 
 
 //! update profile
-export const update = catchAsync(
-  async (req: Request, res: Response, next: NextFunction)=> {
-  const { email } = req.body;
+// export const update = catchAsync(
+//   async (req: Request, res: Response, next: NextFunction)=> {
+//   const { email } = req.body;
 
-  },
-)
-//! get profile
+//   },
+// )
+// //! get profile
 
 //! change password
 
 //! hash password 
-const hash = await hashPassword(password);
-User.password = hash;
+// const hash = await hashPassword(password);
+// User.password = hash;
 
 //! handle profile image
 
 //* save user
-await user.save() 
+// await user.save() 
