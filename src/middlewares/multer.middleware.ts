@@ -19,7 +19,7 @@ export const multerUploader = () => {
         cb(null, uploadFolder)
       },
       filename: function (req, file, cb) {
-        const uniqueName = Date.now()+ "-"+ file.originalname;
+        const uniqueName = Date.now()+ "-"+ file.originalname.replace(/\s/g, "");
         // const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
         cb(null, uniqueName)
       }

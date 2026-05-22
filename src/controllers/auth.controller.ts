@@ -6,11 +6,14 @@ import { sendResponse } from "../utils/sendResponse.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utilis";
 import { generateJwtToken } from "../utils/jwt.utilis";
+import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 
-
+const folder = "/profile_image"
 //! register
 export const register = catchAsync(async (req: Request,res: Response) => {
-    const { full_name, email, password, phone } = req.body;
+const { full_name, email, password, phone } = req.body;
+    const image = req.file;
+    console.log(image);
     if (!full_name) {
       throw new AppError("full_name is required", 404);
     }
@@ -21,12 +24,23 @@ export const register = catchAsync(async (req: Request,res: Response) => {
       throw new AppError("password is required", 404);
     }
     //* create User instance
-    const hash = await hashPassword(password);
     const user = new User({ full_name, email, password, phone });
-    user.password = hash;
-
+    
+    //* phash password 
+    const hash = await hashPassword(password);
+user.password = hash;
 
     //! handle profile image
+    if(image) {
+      const {path,public_id} = await sendFileToCloudinary(
+        image,
+        folder,
+      );
+      user.profile_image = {
+        path,
+        public_id,
+      }
+    }
 
 
     //* save user
@@ -120,5 +134,41 @@ const access_token = generateJwtToken(payload);
 
 //! handle profile image
 
-//* save user
-// await user.save() 
+
+export const changeProfilePitcure = catchAsync(async(req: Request, res: Response)=>{
+
+  const image = req.file as Express.Multer.File;
+  const { id } = req.params;
+
+  if(!image){
+    throw new AppError("profile image required", 400);
+  }
+  //! find user 
+  const user = await User.findOne({ _id: id })
+  
+  if(!user){
+    throw new AppError("user account not found", 400);
+  }
+
+  //! upload image to cloud
+  const {path, public_id} = await sendFileToCloudinary(image, folder);
+  
+  //! delete old image
+  if(user?.profile_image?.public_id){
+    await deleteFileFromCloudinary(user.profile_image.public_id);
+  } 
+  //! assignn new image to user
+  user.profile_image = {
+    path,
+    public_id,
+  } 
+
+  //! save user
+  await user.save();
+  
+  sendResponse(res, {
+    message: "profile image updated",
+    data: user,
+    statusCode:200,
+  })
+});
