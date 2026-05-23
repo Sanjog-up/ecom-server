@@ -102,7 +102,7 @@ export const updateCategory = catchAsync( async (req: Request, res: Response) =>
     await category.save(); 
 
     sendResponse(res,{
-        message: `caregory ${id} updated`,
+        message: `category ${id} updated`,
         data: category,
         statusCode: 200
     });

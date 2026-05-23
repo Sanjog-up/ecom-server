@@ -8,7 +8,71 @@ import Brand from "../models/brand.model";
 
 const folder = "/brands";
 
+//! get all
+export const getAll = catchAsync(async (req:Request, res: Response) => {
 
+        const brands = await Brand.find();
+
+        sendResponse(res, {
+            message: "brands fetched",
+            data: brands,
+            statusCode: 200,
+        });
+    });
+
+//! get by id
+export const getById = catchAsync(async (req:Request, res: Response) => {
+
+        const { id } = req.params;
+        const brand = await Brand.findOne({_id: id});
+        if(!brand){
+           throw new AppError(`brand ${id} not found`, 400)
+        }
+
+     sendResponse(res, {
+        message: `brand ${id} fetched`,
+        data:brand,
+        statusCode: 200,
+     });
+    });
+
+
+//! update
+export const updateBrand = catchAsync( async (req: Request, res: Response) => {
+        const { id } = req.params;
+        const { name, description } = req.body;
+        const image = req.file as Express.Multer.File;
+
+        const brand = await Brand.findOne({_id: id });
+          if(!brand){
+           throw new AppError(`brand ${id} not found`, 404)
+        }
+
+        if(name) brand.name = name;
+        if(description) brand.description = description;
+        if(name && name !== brand.name){
+            const duplicate = await Brand.findOne({ name, _id: {$ne: id}
+            });
+            if(duplicate) throw new AppError("brand name already exists", 400);
+        }
+        if(image){
+            const {path, public_id} = await sendFileToCloudinary(image, folder);
+            await deleteFileFromCloudinary(brand.image.public_id);
+            brand.image = {
+                public_id,
+                path
+            };
+        };
+   
+    //* save updated category to database
+    await brand.save(); 
+
+    sendResponse(res,{
+        message: `brand ${id} updated`,
+        data: brand,
+        statusCode: 200
+    });
+     });
 //? create brand 
 export const brand = catchAsync(async(req: Request, res:Response)=> {
     const { name, description } = req.body;
