@@ -3,8 +3,10 @@ import  Category from "../models/category.model";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { sendResponse } from "../utils/sendResponse.utils";
 import AppError from "../utils/appError.utils";
-import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
-import cloudinary from "../config/cloudinary.config";
+import {
+     deleteFileFromCloudinary,
+     sendFileToCloudinary } from "../utils/cloudinary.utils";
+// import cloudinary from "../config/cloudinary.config";
 
 // cloudinary folder to upload image
 const folder = "/categories";
