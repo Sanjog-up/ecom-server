@@ -9,12 +9,12 @@ import brandRoutes from "./routes/brand.routes";
 
 //! creating express app instance
 const app = express();
-
-
+ 
+//! using middlewares
+//* cookie parser
+app.use(cookieParser()); 
 //! body parser
 app.use(express.json({ limit: "10mb"})) ;
-
-//! using middlewares
 
 //! helth route
 app.get("/", (req: Request, res: Response) =>

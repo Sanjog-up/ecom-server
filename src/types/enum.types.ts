@@ -5,3 +5,4 @@ export enum Role {
 
 }
 
+// Object.values(obj) => []
