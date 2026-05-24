@@ -1,9 +1,11 @@
 import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middlewares";
+import cookieParser from "cookie-parser";
 
 //! importing routes
 import routes from "./routes"; 
 import AppError from "./utils/appError.utils";
+import brandRoutes from "./routes/brand.routes";
 
 //! creating express app instance
 const app = express();
@@ -26,6 +28,7 @@ app.get("/", (req: Request, res: Response) =>
 
 //! using routes
 app.use("/api/v1", routes);
+app.use("/api/v1/brands", brandRoutes);
 
 //! path not found error middleware
 app.use((req: Request, res: Response,next: NextFunction)=>{

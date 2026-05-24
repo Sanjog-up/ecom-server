@@ -74,7 +74,7 @@ export const updateBrand = catchAsync( async (req: Request, res: Response) => {
     });
      });
 //? create brand 
-export const brand = catchAsync(async(req: Request, res:Response)=> {
+export const createBrand = catchAsync(async(req: Request, res:Response)=> {
     const { name, description } = req.body;
     const image = req.file;
     if(!image){

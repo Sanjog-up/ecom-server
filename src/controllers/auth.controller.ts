@@ -10,6 +10,7 @@ import {
   deleteFileFromCloudinary,
   sendFileToCloudinary,
 } from "../utils/cloudinary.utils";
+import ENV_CONFIG from "../config/env.config";
 
 const folder = "/profile_image";
 //! register
@@ -97,6 +98,13 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   };
   const access_token = generateJwtToken(payload);
 
+  //* send access_token in cookie
+  res.cookie("access_token", access_token,{
+    httpOnly: ENV_CONFIG.node_env === "development" ? false: true,
+    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7")* 24 * 60 * 1000,
+    secure: ENV_CONFIG.node_env === "development" ? false: true,
+    sameSite: ENV_CONFIG.node_env === "development" ? "lax" : "none",
+  }) 
   //* success response
   sendResponse(res, {
     message: "Login successful",
