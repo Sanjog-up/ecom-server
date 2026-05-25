@@ -30,7 +30,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   //* create User instance
   const user = new User({ full_name, email, password, phone });
 
-  //* phash password
+  //* hash password
   const hash = await hashPassword(password);
   user.password = hash;
 
@@ -114,26 +114,19 @@ export const login = catchAsync(async (req: Request, res: Response) => {
 });
 
 //! update profile
-// export const update = catchAsync(
-//   async (req: Request, res: Response, next: NextFunction)=> {
-//   const { email } = req.body;
 
-//   },
-// )
 // //! get profile
 
 //! change password
 
 //! hash password
-// const hash = await hashPassword(password);
-// User.password = hash;
 
 //! handle profile image
 
 export const changeProfilePitcure = catchAsync(
   async (req: Request, res: Response) => {
     const image = req.file as Express.Multer.File;
-    const { id } = req.params;
+    const id = req.user?._id;
 
     if (!image) {
       throw new AppError("profile image required", 400);

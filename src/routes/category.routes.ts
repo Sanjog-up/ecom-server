@@ -6,6 +6,8 @@ import {
     updateCategory,
     deleteCategory,
 } from "../controllers/category.controller";
+import { authenticate } from "../middlewares/auth.middleware";
+import { Only_Admins } from "../types/enum.types";
 
 const router = express.Router();
 
@@ -15,10 +17,10 @@ router.get("/", getAll);
 //? get by id  
 router.get("/:id", getById);
 //? create category 
-router.post("/", createCategory);
+router.post("/", authenticate(Only_Admins),createCategory);
 //? update category 
-router.put("/:id", updateCategory);
+router.put("/:id", authenticate(Only_Admins),updateCategory);
 //? delete  
-router.delete("/:id", deleteCategory);
+router.delete("/:id", authenticate(Only_Admins), deleteCategory);
 
 export default router;

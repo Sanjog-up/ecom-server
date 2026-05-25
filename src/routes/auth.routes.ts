@@ -1,6 +1,8 @@
 import express from "express";
 import { changeProfilePitcure, login, register } from "../controllers/auth.controller";
 import { multerUploader } from "../middlewares/multer.middleware";
+import { authenticate } from "../middlewares/auth.middleware";
+import { All_Users, Role } from "../types/enum.types";
 
 const router = express.Router();
 
@@ -14,8 +16,9 @@ router.post("/login", login);
 
 //! change profile image
 router.put(
-    "/change-profile-image/:id", 
-    upload.single("profile_image"), 
+    "/change-profile-image", 
+    upload.single("profile_image"),
+    authenticate(All_Users),
     changeProfilePitcure,
 );
 
