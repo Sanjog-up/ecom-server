@@ -1,4 +1,10 @@
-// get all products
+import { Request, Response } from "express";
+
+
+
+
+
+
 // get by id 
 // create
 // update
