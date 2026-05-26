@@ -11,6 +11,7 @@ import {
   sendFileToCloudinary,
 } from "../utils/cloudinary.utils";
 import ENV_CONFIG from "../config/env.config";
+import { sendEmail } from "../utils/sendEmail.utils";
 
 const folder = "/profile_image";
 //! register
@@ -97,6 +98,9 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     role: user.role,
   };
   const access_token = generateJwtToken(payload);
+
+  await sendEmail();
+
 
   //* send access_token in cookie
   res.cookie("access_token", access_token,{
