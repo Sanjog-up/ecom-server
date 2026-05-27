@@ -1,3 +1,4 @@
+import Mail from "nodemailer/lib/mailer";
 import ENV_CONFIG from "../config/env.config";
 import transporter from "../config/nodemailer.config";
 
@@ -7,18 +8,27 @@ type IEmailOption = {
     html: string;
     cc?: string | string[];
     bcc?: string | string[];
-    attatchments: any[]; 
+    attatchments?: any[]; 
 };
 
-export const sendEmail = async (options: IEmailOption) => {
+export const sendEmail = async ({attatchments,html,subject,to,bcc,cc} : IEmailOption) => {
     try {
-        await transporter.sendMail({
-            to: "vuntuaale92@gmail.com",
-            from: `Project Ecoomerce <${ENV_CONFIG.smtp_user}>`,
-            subject: "welcom to ecom",
-            // text: "login successful. Welcome to ecom",
-            html : ``,
-        })
+        const mailOptions: Mail.Options = {
+            to: to,
+               from: `Project Ecoomerce <${ENV_CONFIG.smtp_user}>`,
+            subject: subject,
+            html: html,
+        };
+        if(cc) {
+            mailOptions["cc"] = cc;
+        }
+        if(bcc){
+            mailOptions["bcc"]= bcc;
+        }
+        if(attatchments){
+            mailOptions["attachments"]= attatchments;
+        }
+        await transporter.sendMail(mailOptions);
         return true;
     } catch (error) {
         console.log(error);
