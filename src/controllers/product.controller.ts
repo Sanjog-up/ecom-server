@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 
 
-// get by id 
+// get by id
 // create
 // update
 //  remove
