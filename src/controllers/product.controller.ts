@@ -4,7 +4,7 @@ import { sendResponse } from "../utils/sendResponse.utils";
 import  Product  from "../models/product.model";
 import AppError from "../utils/appError.utils";
 import Category from "../models/category.model";
-import { sendFileToCloudinary } from "../utils/cloudinary.utils";
+import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 
 const folders =  "/products";
 //* get all products
@@ -126,6 +126,34 @@ export const create = catchAsync(async(req: Request, res: Response)=>{
   })
 // update
 //  remove
+export const remover = catchAsync(async(req:Request, res: Response)=>{
+  const { id } = req.params;
+
+  const product = await Product.findOne({ _id: id });
+  
+  if(!product){
+    throw new AppError(`Product ${id} not found`, 404);
+  }
+
+  await deleteFileFromCloudinary(product.cover_image.public_id);
+
+  if(product.images){
+    const promises = product.images.map(
+     async( img: any )=> await deleteFileFromCloudinary(img.public_id),
+  );
+  await Promise.all(promises);
+}
+//! delete product 
+  await product.deleteOne();
+
+  //! send success response 
+  sendResponse(res, {
+    message: `product ${product._id} deleted`,
+    statusCode: 200,
+    data: null,
+  })
+
 // get by category
+
 // get all featured products
 // get all new arrivals
