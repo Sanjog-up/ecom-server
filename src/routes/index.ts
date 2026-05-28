@@ -10,4 +10,6 @@ router.use("/auth", authRoutes);
 router.use("/users", userRoutes);
 router.use("/categories", categoryRoutes);
 router.use("/brands", brandRoutes);
+router.use("/products", "productsRoutes");
+
 export default router;

@@ -3,7 +3,10 @@ import { catchAsync } from "../utils/catchAsync.utils";
 import { sendResponse } from "../utils/sendResponse.utils";
 import  Product  from "../models/product.model";
 import AppError from "../utils/appError.utils";
+import Category from "../models/category.model";
+import { sendFileToCloudinary } from "../utils/cloudinary.utils";
 
+const folders =  "/products";
 //* get all products
 export const getAll = catchAsync(async(req: Request, res: Response)=>{
     const filter = {};
@@ -44,6 +47,83 @@ export const getByCategory = catchAsync(async (req: Request, res: Response) => {
   });
 });
 // create
+
+export const create = catchAsync(async(req: Request, res: Response)=>{
+  const {
+    name, 
+    desciption, 
+    price, 
+    category, 
+    brand, 
+    stock, 
+    featured, 
+    new_arrival
+  } = req.body;
+
+  //! files 
+  const { image, cover_image } = req.files as 
+  {
+    [fieldname: string]: Express.Multer.File[];
+
+  };
+  if(!name || !price || !stock){
+    throw new AppError("name, price and stock are required", 400);
+  }
+  if(!category || !brand){
+    throw new AppError("category and brand are required", 400);
+  }
+  if(!cover_image[0]){
+    throw new AppError("cover image is required", 400);
+  }
+  const product = new Product({
+    name,
+    stock,
+    price,
+    desciption,
+    new_arrival,
+    featured
+  });
+
+  const p_category = await Category.findOne({ _id: category});
+  if(!p_category){
+    throw new AppError(`Category not found`, 404);
+  }
+  const p_brand = await Brand.findOne({ _id: brand});
+  if(!p_brand){
+    throw new AppError(`Brand not found`, 404);
+  }
+  product.category = p_category._id;
+  product.brand = p_brand._id;
+
+
+  //todo images
+  //* cover image
+  const {path, public_id} = await sendFileToCloudinary(cover_image[0], folders );
+  product.cover_image = {
+    path,
+    public_id,
+  };
+
+  //* images
+  if(image && Array.isArray(image) && image.length > 0){
+  const promises = image.map(
+    async (file) => await sendFileToCloudinary(file, folders)
+  );
+
+  const files = await Promise.all(promises);
+
+  product.images = files as any;
+  } 
+
+  //! save product 
+  await product.save();
+
+  sendResponse(res, {
+    message: `Product created successfully`,
+    statusCode: 201,
+    data: product,  
+  });
+  })
 // update
 //  remove
 // get by category
