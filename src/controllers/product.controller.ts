@@ -54,7 +54,7 @@ export const getByCategory = catchAsync(async (req: Request, res: Response) => {
 export const create = catchAsync(async(req: Request, res: Response)=>{
   const {
     name, 
-    desciption, 
+    description, 
     price, 
     category, 
     brand, 
@@ -82,7 +82,7 @@ export const create = catchAsync(async(req: Request, res: Response)=>{
     name,
     stock,
     price,
-    desciption,
+    description,
     new_arrival,
     featured
   });

@@ -5,7 +5,7 @@ export const sendFileToCloudinary = async(file: Express.Multer.File,
     folder = "/"
 ) => {
     try {
-        const upload_folder = "team_12" + FileSystemDirectoryReader;
+        const upload_folder = "team_12" + folder;
         const {public_id, secure_url} = await cloudinary.uploader.upload(file.path,{
             
                 folder: upload_folder,

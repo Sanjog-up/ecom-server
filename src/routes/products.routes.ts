@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAll, getById, getByCategory, create, getFeaturedProducts, getNewArrivals } from '../controllers/product.controller';
+import { getAll, getById, getByCategory, create, getFeaturedProducts, getNewArrivals, remove } from '../controllers/product.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { Only_Admins } from '../types/enum.types';
 import { multerUploader } from '../middlewares/multer.middleware';
@@ -34,5 +34,8 @@ router.post("/",
     },
     ]), authenticate(Only_Admins), 
     create); 
+
+ //? remove
+    router.delete("/:id", authenticate(Only_Admins), remove);
 
 export default router;

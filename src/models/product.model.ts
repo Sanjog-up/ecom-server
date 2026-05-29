@@ -15,12 +15,12 @@ const productSchema = new mongoose.Schema(
 
     },
     price: {
-        type: String,
+        type: Number,
         required: [true, "price is required"],
     },
     stock: {
         type: Number,
-        required: [ true, "cover_image is required"],
+        required: [ true, "stock is required"],
     },
     cover_image:{
         type: {

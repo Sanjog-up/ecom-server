@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 
+
 interface ICategorySchema extends Document{
     name: string;
     description?: string;

@@ -13,9 +13,7 @@ const folder = "/categories";
 //! get all
 export const getAll = catchAsync(async (req:Request, res: Response, next: NextFunction) => {
    
-    const { id } = req.params;
-
-        const categories = await Category.findOne({_id: id});
+const categories = await Category.findOne();
 
         sendResponse(res, {
             message: "categories fetched",
@@ -45,7 +43,9 @@ export const createCategory = catchAsync(async (req:Request, res: Response) => {
 
         const { name, description } = req.body;
         const image = req.file as Express.Multer.File;
-
+   console.log("body:", req.body);
+    console.log("file:", req.file);
+    console.log("headers:", req.headers["content-type"]);
         if(!name){
             throw new AppError("name is required", 400);
         }
