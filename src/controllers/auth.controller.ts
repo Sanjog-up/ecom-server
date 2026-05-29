@@ -1,6 +1,6 @@
 import User from "../models/user.model";
 import { NextFunction, Request, RequestHandler, Response } from "express";
-// import { Role } from "../types/enum.types";
+import { Role } from "../types/enum.types";
 import AppError from "../utils/appError.utils";
 import { sendResponse } from "../utils/sendResponse.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
@@ -13,11 +13,12 @@ import {
 import ENV_CONFIG from "../config/env.config";
 import { sendEmail } from "../utils/sendEmail.utils";
 import { generateLoginSuccessEmailHtml } from "../utils/email.utils";
+import jwt from "jsonwebtoken";
 
 const folder = "/profile_image";
 //! register
 export const register = catchAsync(async (req: Request, res: Response) => {
-  const { full_name, email, password, phone } = req.body;
+  const { full_name, email, password, phone, role } = req.body;
   const image = req.file;
   console.log(image);
   if (!full_name) {
@@ -30,8 +31,14 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("password is required", 404);
   }
   //* create User instance
-  const user = new User({ full_name, email, password, phone });
+  const user = new User({ full_name, email, password, phone, role });
 
+  //* generate access token -> jwt
+  const token = jwt.sign(
+    { _id: user._id, role: user.role, email: user.email, full_name: user.full_name },
+    ENV_CONFIG.jwt_secret as string,
+    { expiresIn: "7d" }
+  );
   //* hash password
   const hash = await hashPassword(password);
   user.password = hash;
@@ -51,7 +58,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   //* success response
   sendResponse(res, {
     message: "Account created",
-    data: user,
+    data: {user, token },
     statusCode: 201,
   });
 });

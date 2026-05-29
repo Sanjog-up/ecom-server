@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAll, getById, getByCategory, create } from '../controllers/product.controller';
+import { getAll, getById, getByCategory, create, getFeaturedProducts, getNewArrivals } from '../controllers/product.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { Only_Admins } from '../types/enum.types';
 import { multerUploader } from '../middlewares/multer.middleware';
@@ -16,7 +16,7 @@ router.get('/category/:id', getByCategory);
 router.get('/featured', getFeaturedProducts);
 
 //? new arrivals
-router.get('/new-arrivals', getNewArrivalsProducts);
+router.get('/new-arrivals', getNewArrivals);
 
 //? get by id 
 router.get('/:id', getById);

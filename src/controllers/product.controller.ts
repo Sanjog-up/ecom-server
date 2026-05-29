@@ -5,6 +5,7 @@ import  Product  from "../models/product.model";
 import AppError from "../utils/appError.utils";
 import Category from "../models/category.model";
 import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
+import Brand from "../models/brand.model";
 
 const folders =  "/products";
 //* get all products
@@ -36,18 +37,20 @@ export const getAll = catchAsync(async(req: Request, res: Response)=>{
     });
 }); 
 
+//* get by category 
 export const getByCategory = catchAsync(async (req: Request, res: Response) => {
-  const { categoryId } = req.params;
-  const products = await Product.find({ category: categoryId });
+  const { id } = req.params;
+  const products = await Product.find({ category: id });
 
   sendResponse(res, {
-    message: `Product by category ${categoryId} fetched`,
+    message: `Product by category ${id} fetched`,
     statusCode: 200,
     data: products,
   });
 });
-// create
 
+
+//* create
 export const create = catchAsync(async(req: Request, res: Response)=>{
   const {
     name, 
@@ -124,9 +127,9 @@ export const create = catchAsync(async(req: Request, res: Response)=>{
     data: product,  
   });
   })
-// update
-//  remove
-export const remover = catchAsync(async(req:Request, res: Response)=>{
+
+//*  remove
+export const remove = catchAsync(async(req:Request, res: Response)=>{
   const { id } = req.params;
 
   const product = await Product.findOne({ _id: id });
@@ -152,8 +155,26 @@ export const remover = catchAsync(async(req:Request, res: Response)=>{
     statusCode: 200,
     data: null,
   })
+});
 
-// get by category
+//* get all featured products
+export const getFeaturedProducts = catchAsync(async(req: Request, res: Response)=>{
+  const products = await Product.find({ featured: true });
 
-// get all featured products
-// get all new arrivals
+  sendResponse(res, {
+    message: `Featured products fetched`,
+    statusCode: 200,
+    data: products,
+  });
+});
+
+//* get all new arrivals
+export const getNewArrivals = catchAsync(async(req: Request, res: Response)=>{
+  const products = await Product.find({ new_arrival: true }).limit(10);
+
+  sendResponse(res, {
+    message: `New arrivals fetched`,
+    statusCode: 200,
+    data: products,
+  });
+});

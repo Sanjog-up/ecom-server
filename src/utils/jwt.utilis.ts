@@ -13,7 +13,6 @@ import ENV_CONFIG from "../config/env.config";
 
 export type TJwtReturn = { iat:number, exp: number} &TPayload;
 //! generate access token
-
 export const generateJwtToken = (payload: TPayload) => {
     try {
         const access_token = jwt.sign(payload, ENV_CONFIG.jwt_secret, {
