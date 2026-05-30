@@ -1,7 +1,42 @@
-
+import { Request, Response } from "express";
+import { catchAsync } from "../utils/catchAsync.utils";
+import Cart from "../models/cart.model";
+import { sendResponse } from "../utils/sendResponse.utils";
+import AppError from "../utils/appError.utils";
+import Product from "../models/product.model";
 
 //! add to cart
+export const addToCart = catchAsync(async (req: Request, res: Response) => {
+  const userId = req.user._id;
+  const { productId, quantity } = req.body;
 
+  if ( !productId || !quantity) {
+    throw new AppError("userId, productId and quantity are required", 400);
+  }
+
+  if (quantity <= 0) {
+    throw new AppError("Quantity must be greater than zero", 400);
+  }
+  const product = await Product.findById(productId);
+  if (!product) {
+    throw new AppError(`Product with id ${productId} not found`, 404);
+  }
+
+  let cartItem = await Cart.findOne({ user: userId, product: productId });
+
+  if (cartItem) {
+    cartItem.quantity += quantity;
+    await cartItem.save();
+  } else {
+    cartItem = await Cart.create({ user: userId, product: productId, quantity });
+  }
+
+  sendResponse(res, {
+    message: "Product added to cart",
+    statusCode: 201,
+    data: { cartItem },
+  });
+});
 //! remove from cart
 
 //! get cart

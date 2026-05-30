@@ -33,12 +33,6 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   //* create User instance
   const user = new User({ full_name, email, password, phone, role });
 
-  //* generate access token -> jwt
-  const token = jwt.sign(
-    { _id: user._id, role: user.role, email: user.email, full_name: user.full_name },
-    ENV_CONFIG.jwt_secret as string,
-    { expiresIn: "7d" }
-  );
   //* hash password
   const hash = await hashPassword(password);
   user.password = hash;
@@ -54,6 +48,14 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 
   //* save user
   await user.save();
+
+
+  //* generate access token -> jwt
+  const token = jwt.sign(
+    { _id: user._id, role: user.role, email: user.email, full_name: user.full_name },
+    ENV_CONFIG.jwt_secret as string,
+    { expiresIn: "7d" }
+  );
 
   //* success response
   sendResponse(res, {
@@ -117,7 +119,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   //* send access_token in cookie
   res.cookie("access_token", access_token,{
     httpOnly: ENV_CONFIG.node_env === "development" ? false: true,
-    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7")* 24 * 60 * 1000,
+    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7")* 24 * 60 * 60* 1000,
     secure: ENV_CONFIG.node_env === "development" ? false: true,
     sameSite: ENV_CONFIG.node_env === "development" ? "lax" : "none",
   }) 
@@ -129,16 +131,8 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+
 //! update profile
-
-// //! get profile
-
-//! change password
-
-//! hash password
-
-//! handle profile image
-
 export const changeProfilePitcure = catchAsync(
   async (req: Request, res: Response) => {
     const image = req.file as Express.Multer.File;
@@ -177,3 +171,9 @@ export const changeProfilePitcure = catchAsync(
     });
   },
 );
+
+
+
+//! change password
+
+//! handle profile image

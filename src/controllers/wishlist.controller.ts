@@ -7,7 +7,8 @@ import Product from '../models/product.model';
 
 //! add/remove product from wishlist 
 export const addorremoveToWishlist = catchAsync(async(req: Request, res: Response) => {
-    const { userId, productId } = req.body;
+    const userId = req.user._id;
+    const { productId } = req.body;
 
     if(!userId || !productId){
         throw new AppError("userId and productId are required", 400);
@@ -17,7 +18,7 @@ export const addorremoveToWishlist = catchAsync(async(req: Request, res: Respons
     if(!product){
         throw new AppError(`Product with id ${productId} not found`, 404);
     }
-    const existingEntry = await wishlist.findOne({ user: userId, product: productId });
+    const existingEntry = await wishlist.findOne({ user: userId, productId: productId });
      // Product already in wishlist, remove it
     if (existingEntry) {
         await existingEntry.deleteOne();
@@ -41,7 +42,7 @@ export const addorremoveToWishlist = catchAsync(async(req: Request, res: Respons
 
 //! get wishlist
 export const getWishlist = catchAsync(async (req: Request, res: Response) => {
-    const { userId } = req.params;
+    const userId = req.user._id;
 
     if (!userId) {
         throw new AppError("userId is required", 400);

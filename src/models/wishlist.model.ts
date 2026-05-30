@@ -19,5 +19,3 @@ user: {
 const wishList = mongoose.model("Wishlist", wishlistSchema);
 
 export default wishList;
-
-
