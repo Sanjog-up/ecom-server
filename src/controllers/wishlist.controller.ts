@@ -1,30 +1,74 @@
 import { Request, Response } from 'express';
-
-export const addToWishlist = (req: Request, res: Response) => {
-    const { userId, productId } = req.body;
-
-
-    res.status(200).json({ message: 'Product added to wishlist' });
-};
-
-export const removeFromWishlist = (req: Request, res: Response) => {
-    // Logic to remove a product from the user's wishlist
-    res.status(200).json({ message: 'Product removed from wishlist' });
-};
-
-export const getWishlist = (req: Request, res: Response) => {
-    // Logic to retrieve the user's wishlist
-    res.status(200).json({ wishlist: [] }); // Replace with actual wishlist data
-};
-
-export const clearWishlist = (req: Request, res: Response) => {
-    // Logic to clear the user's wishlist
-    res.status(200).json({ message: 'Wishlist cleared' });
-};
-
+import {catchAsync} from '../utils/catchAsync.utils';
+import wishlist from '../models/wishlist.model';
+import { sendResponse } from '../utils/sendResponse.utils';
+import AppError from '../utils/appError.utils';
+import Product from '../models/product.model';
 
 //! add/remove product from wishlist 
+export const addorremoveToWishlist = catchAsync(async(req: Request, res: Response) => {
+    const { userId, productId } = req.body;
+
+    if(!userId || !productId){
+        throw new AppError("userId and productId are required", 400);
+    }
+    
+    const product = await Product.findById(productId);
+    if(!product){
+        throw new AppError(`Product with id ${productId} not found`, 404);
+    }
+    const existingEntry = await wishlist.findOne({ user: userId, product: productId });
+     // Product already in wishlist, remove it
+    if (existingEntry) {
+        await existingEntry.deleteOne();
+
+        sendResponse(res, {
+            message: 'Product removed from wishlist',
+            statusCode: 200,
+            data: { wishlisted: false, productId }
+        })
+        return;
+    }
+    const wishlistItem = await wishlist.create({ user: userId, productId });
+
+    sendResponse(res, {
+        message: 'Product added to wishlist',
+        statusCode: 201,
+        data: { wishlisted: true, productId, wishlistItemId: wishlistItem._id }
+    });
+    
+    });
 
 //! get wishlist
+export const getWishlist = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        throw new AppError("userId is required", 400);
+    }
+
+    const wishlistItems = (await wishlist.find({ user: userId }).populate('productId').sort({ createdAt: -1 }));
+    
+    sendResponse(res, {
+        message: 'Wishlist fetched',
+        statusCode: 200,
+        data: { wishListCount: wishlistItems.length, wishlist: wishlistItems }
+    });
+});
 
 //! clear wishlist 
+export const clearWishlist = catchAsync(async (req: Request, res: Response) => {
+    const { userId } = req.params;
+
+    if (!userId) {
+        throw new AppError("userId is required", 400);
+    }
+
+    await wishlist.deleteMany({ user: userId });
+
+    sendResponse(res, {
+        message: 'Wishlist cleared',
+        statusCode: 200,
+        data: null
+    });
+});
