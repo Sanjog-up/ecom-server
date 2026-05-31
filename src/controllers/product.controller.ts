@@ -6,19 +6,54 @@ import AppError from "../utils/appError.utils";
 import Category from "../models/category.model";
 import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 import Brand from "../models/brand.model";
+import mongoose from "mongoose";
 
 const folders =  "/products";
 //* get all products
 export const getAll = catchAsync(async(req: Request, res: Response)=>{
-    const filter = {};
+  const { query, category, brand , minPrice, maxPrice, limit = "10", page = "1" } = req.query;
+    const filter: mongoose.QueryFilter<any> = {};
+  const perPage = Number(limit);
+  const currentPage = Number(page);
+  const skip = (currentPage - 1) * perPage;
+  // c_page : 1, skip:0, 1-10
+  // 2, 10, 11-20
+  // 3, 20, 21-30
+  
+    if(query){
+      filter.$or = [
+        { name: { $regex: query, $options: "i" } },
+        { description: { $regex: query, $options: "i" }, },
+      ];
+    }
 
-    const products = await Product.find(filter);
+    if(category){
+      filter.category = category;
+    }
+    if(brand){
+      filter.brand = brand;
+    }
 
-    sendResponse(res, {
-        message: `Product fetched`,
-        statusCode: 200,
-        data: products,
-    });
+    //! price filter
+    if(minPrice || maxPrice){
+      filter.price = {};
+      if(minPrice){
+        filter.price = {
+          $gte: Number(minPrice)};
+      }
+      if(maxPrice){
+        filter.price = {
+          $lte : Number(maxPrice),
+        };
+      }
+    }; 
+
+
+    const products = await Product.find(filter).skip(skip).limit(perPage);
+
+    const count = await Product.countDocuments(filter);
+
+
 }); 
 
 //* get by id 

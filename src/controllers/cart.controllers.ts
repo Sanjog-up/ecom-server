@@ -44,6 +44,7 @@ export const addToCart = catchAsync(async (req: Request, res: Response) => {
     message: "Product added to cart",
     statusCode: 201,
     data: { cartItem },
+    
   });
 });
 //! remove from cart
