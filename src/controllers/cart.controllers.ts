@@ -10,7 +10,7 @@ export const addToCart = catchAsync(async (req: Request, res: Response) => {
   const userId = req.user._id;
   const { productId, quantity } = req.body;
 
-  if ( !productId || !quantity) {
+  if (!productId || !quantity) {
     throw new AppError("userId, productId and quantity are required", 400);
   }
 
@@ -22,14 +22,23 @@ export const addToCart = catchAsync(async (req: Request, res: Response) => {
     throw new AppError(`Product with id ${productId} not found`, 404);
   }
 
-  let cartItem = await Cart.findOne({ user: userId, product: productId });
+  let cartItem = await Cart.findOne({
+    user: userId,
+    items: { $elemMatch: { product: productId } },
+  });
 
   if (cartItem) {
-    cartItem.quantity += quantity;
-    await cartItem.save();
+    cartItem.items.forEach((item) => {
+      if (item.product.toString() === productId) {
+        item.quantity += quantity;
+      }
+    });
   } else {
-    cartItem = await Cart.create({ user: userId, product: productId, quantity });
+    cartItem = await Cart.create({ user: userId, items: [] });
+    cartItem.items.push({ product: productId, quantity });
   }
+
+  await cartItem.save();
 
   sendResponse(res, {
     message: "Product added to cart",
