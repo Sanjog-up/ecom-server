@@ -175,5 +175,43 @@ export const changeProfilePitcure = catchAsync(
 
 
 //! change password
+export const changePassword = catchAsync(async(req: Request, res: Response)=>{
+  const id = req.user?._id;
+  const { old_password, new_password, confirm_password } = req.body;
 
+  if(!old_password || !new_password || !confirm_password){
+    throw new AppError("all fields are required", 400);
+  }
+
+  if(new_password !== confirm_password){
+    throw new AppError("new password and confirm password does not match", 400);
+  }
+
+  //! find user
+  const user = await User.findOne({_id: id});
+
+  if(!user){
+    throw new AppError("user account not found", 400);
+  }
+
+  //! compare old password
+  const isPasswordMatched = await comparePassword(old_password, user.password);
+
+  if(!isPasswordMatched){
+    throw new AppError("old password is incorrect", 400);
+  }
+
+  //! hash new password
+  const hash = await hashPassword(new_password);
+  user.password = hash;
+
+  //! save user
+  await user.save();
+
+  sendResponse(res, {
+    message: "password changed successfully",
+    data: null,
+    statusCode: 200,
+  });
+});
 //! handle profile image

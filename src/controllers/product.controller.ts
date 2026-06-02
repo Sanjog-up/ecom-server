@@ -7,6 +7,7 @@ import Category from "../models/category.model";
 import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 import Brand from "../models/brand.model";
 import mongoose from "mongoose";
+import { getPagination } from "../utils/pagination.utils";
 
 const folders =  "/products";
 //* get all products
@@ -53,6 +54,12 @@ export const getAll = catchAsync(async(req: Request, res: Response)=>{
 
     const count = await Product.countDocuments(filter);
 
+    sendResponse(res, {
+        message: `Products fetched successfully`,
+        statusCode: 200,
+        data: products,
+        meta: getPagination(count, currentPage, perPage),
+    });
 
 }); 
 
