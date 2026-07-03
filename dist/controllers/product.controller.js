@@ -11,6 +11,7 @@ const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const category_model_1 = __importDefault(require("../models/category.model"));
 const cloudinary_utils_1 = require("../utils/cloudinary.utils");
 const brand_model_1 = __importDefault(require("../models/brand.model"));
+const pagination_utils_1 = require("../utils/pagination.utils");
 const folders = "/products";
 //* get all products
 exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
@@ -51,6 +52,12 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     ;
     const products = await product_model_1.default.find(filter).skip(skip).limit(perPage);
     const count = await product_model_1.default.countDocuments(filter);
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: `Products fetched successfully`,
+        statusCode: 200,
+        data: products,
+        meta: (0, pagination_utils_1.getPagination)(count, currentPage, perPage),
+    });
 });
 //* get by id 
 exports.getById = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {

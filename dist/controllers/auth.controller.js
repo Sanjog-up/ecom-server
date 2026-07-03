@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changeProfilePitcure = exports.login = exports.register = void 0;
+exports.changePassword = exports.changeProfilePitcure = exports.login = exports.register = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const sendResponse_utils_1 = require("../utils/sendResponse.utils");
@@ -46,7 +46,12 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     //* save user
     await user.save();
     //* generate access token -> jwt
-    const token = jsonwebtoken_1.default.sign({ _id: user._id, role: user.role, email: user.email, full_name: user.full_name }, env_config_1.default.jwt_secret, { expiresIn: "7d" });
+    const token = jsonwebtoken_1.default.sign({
+        _id: user._id,
+        role: user.role,
+        email: user.email,
+        full_name: user.full_name,
+    }, env_config_1.default.jwt_secret, { expiresIn: "7d" });
     //* success response
     (0, sendResponse_utils_1.sendResponse)(res, {
         message: "Account created",
@@ -56,6 +61,7 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
 });
 //! login
 exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    console.log("logib");
     //* login
     //* email password <- req.body
     const { email, password } = req.body;
@@ -95,7 +101,11 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     await (0, sendEmail_utils_1.sendEmail)({
         to: user.email,
         subject: `Welcome ${user.full_name}`,
-        html: (0, email_utils_1.generateLoginSuccessEmailHtml)(req, { full_name: user.full_name, _id: user._id, email: user.email })
+        html: (0, email_utils_1.generateLoginSuccessEmailHtml)(req, {
+            full_name: user.full_name,
+            _id: user._id,
+            email: user.email,
+        }),
     });
     //* send access_token in cookie
     res.cookie("access_token", access_token, {
@@ -143,4 +153,34 @@ exports.changeProfilePitcure = (0, catchAsync_utils_1.catchAsync)(async (req, re
     });
 });
 //! change password
+exports.changePassword = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const id = req.user?._id;
+    const { old_password, new_password, confirm_password } = req.body;
+    if (!old_password || !new_password || !confirm_password) {
+        throw new appError_utils_1.default("all fields are required", 400);
+    }
+    if (new_password !== confirm_password) {
+        throw new appError_utils_1.default("new password and confirm password does not match", 400);
+    }
+    //! find user
+    const user = await user_model_1.default.findOne({ _id: id });
+    if (!user) {
+        throw new appError_utils_1.default("user account not found", 400);
+    }
+    //! compare old password
+    const isPasswordMatched = await (0, bcrypt_utilis_1.comparePassword)(old_password, user.password);
+    if (!isPasswordMatched) {
+        throw new appError_utils_1.default("old password is incorrect", 400);
+    }
+    //! hash new password
+    const hash = await (0, bcrypt_utilis_1.hashPassword)(new_password);
+    user.password = hash;
+    //! save user
+    await user.save();
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: "password changed successfully",
+        data: null,
+        statusCode: 200,
+    });
+});
 //! handle profile image

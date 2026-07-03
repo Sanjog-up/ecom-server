@@ -14,7 +14,7 @@ const cloudinary_utils_1 = require("../utils/cloudinary.utils");
 const folder = "/categories";
 //! get all
 exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res, next) => {
-    const categories = await category_model_1.default.findOne();
+    const categories = await category_model_1.default.find();
     (0, sendResponse_utils_1.sendResponse)(res, {
         message: "categories fetched",
         data: categories,
