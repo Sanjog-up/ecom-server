@@ -24,6 +24,9 @@ const ENV_CONFIG = {
     smtp_port: process.env.SMTP_PORT!!,
     smtp_user: process.env.SMTP_USER!!,
     smtp_pass: process.env.SMTP_PASS!!,
+
+    //! origins
+    allow_origin: process.env.ALLOW_ORIGIN!!, 
 };
 
 export default ENV_CONFIG;

@@ -2,7 +2,7 @@ import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middlewares";
 import cookieParser from "cookie-parser";
 import cors from 'cors';
-
+import ENV_CONFIG from "./config/env.config";
 
 //! importing routes
 import routes from "./routes"; 
@@ -11,6 +11,7 @@ import AppError from "./utils/appError.utils";
 //! creating express app instance
 const app = express();
  
+const origins = ENV_CONFIG.allow_origin.split(",")
 
 //! using middlewares
 //* cookie parser
@@ -21,9 +22,19 @@ app.use(cookieParser());
 
 app.use(
     cors({
-        origin: "*",
-    }),
-);
+        origin: (origin, callback) => {
+          console.log(origin);
+          if(!origin){
+            callback(null, true);
+          }
+          if(origins.includes(origin as string)){
+            callback(null, true);
+            }
+            callback(new AppError("Cors error", 403));
+          
+    }, credentials: true,
+    })
+)
 
 //! body parser
 app.use(express.json({ limit: "10mb"})) ;
