@@ -49,24 +49,30 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   //* save user
   await user.save();
 
-
   //* generate access token -> jwt
   const token = jwt.sign(
-    { _id: user._id, role: user.role, email: user.email, full_name: user.full_name },
+    {
+      _id: user._id,
+      role: user.role,
+      email: user.email,
+      full_name: user.full_name,
+    },
     ENV_CONFIG.jwt_secret as string,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 
   //* success response
   sendResponse(res, {
     message: "Account created",
-    data: {user, token },
+    data: { user, token },
     statusCode: 201,
   });
 });
 
 //! login
 export const login = catchAsync(async (req: Request, res: Response) => {
+  console.log("logib");
+
   //* login
   //* email password <- req.body
   const { email, password } = req.body;
@@ -112,17 +118,20 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   await sendEmail({
     to: user.email,
     subject: `Welcome ${user.full_name}`,
-    html: generateLoginSuccessEmailHtml(req, {full_name:user.full_name, _id:user._id, email: user.email})
+    html: generateLoginSuccessEmailHtml(req, {
+      full_name: user.full_name,
+      _id: user._id,
+      email: user.email,
+    }),
   });
 
-
   //* send access_token in cookie
-  res.cookie("access_token", access_token,{
-    httpOnly: ENV_CONFIG.node_env === "development" ? false: true,
-    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7")* 24 * 60 * 60* 1000,
-    secure: ENV_CONFIG.node_env === "development" ? false: true,
+  res.cookie("access_token", access_token, {
+    httpOnly: ENV_CONFIG.node_env === "development" ? false : true,
+    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7") * 24 * 60 * 60 * 1000,
+    secure: ENV_CONFIG.node_env === "development" ? false : true,
     sameSite: ENV_CONFIG.node_env === "development" ? "lax" : "none",
-  }) 
+  });
   //* success response
   sendResponse(res, {
     message: "Login successful",
@@ -130,7 +139,6 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     statusCode: 201,
   });
 });
-
 
 //! update profile
 export const changeProfilePitcure = catchAsync(
@@ -172,46 +180,52 @@ export const changeProfilePitcure = catchAsync(
   },
 );
 
-
-
 //! change password
-export const changePassword = catchAsync(async(req: Request, res: Response)=>{
-  const id = req.user?._id;
-  const { old_password, new_password, confirm_password } = req.body;
+export const changePassword = catchAsync(
+  async (req: Request, res: Response) => {
+    const id = req.user?._id;
+    const { old_password, new_password, confirm_password } = req.body;
 
-  if(!old_password || !new_password || !confirm_password){
-    throw new AppError("all fields are required", 400);
-  }
+    if (!old_password || !new_password || !confirm_password) {
+      throw new AppError("all fields are required", 400);
+    }
 
-  if(new_password !== confirm_password){
-    throw new AppError("new password and confirm password does not match", 400);
-  }
+    if (new_password !== confirm_password) {
+      throw new AppError(
+        "new password and confirm password does not match",
+        400,
+      );
+    }
 
-  //! find user
-  const user = await User.findOne({_id: id});
+    //! find user
+    const user = await User.findOne({ _id: id });
 
-  if(!user){
-    throw new AppError("user account not found", 400);
-  }
+    if (!user) {
+      throw new AppError("user account not found", 400);
+    }
 
-  //! compare old password
-  const isPasswordMatched = await comparePassword(old_password, user.password);
+    //! compare old password
+    const isPasswordMatched = await comparePassword(
+      old_password,
+      user.password,
+    );
 
-  if(!isPasswordMatched){
-    throw new AppError("old password is incorrect", 400);
-  }
+    if (!isPasswordMatched) {
+      throw new AppError("old password is incorrect", 400);
+    }
 
-  //! hash new password
-  const hash = await hashPassword(new_password);
-  user.password = hash;
+    //! hash new password
+    const hash = await hashPassword(new_password);
+    user.password = hash;
 
-  //! save user
-  await user.save();
+    //! save user
+    await user.save();
 
-  sendResponse(res, {
-    message: "password changed successfully",
-    data: null,
-    statusCode: 200,
-  });
-});
+    sendResponse(res, {
+      message: "password changed successfully",
+      data: null,
+      statusCode: 200,
+    });
+  },
+);
 //! handle profile image

@@ -13,7 +13,7 @@ const folder = "/categories";
 //! get all
 export const getAll = catchAsync(async (req:Request, res: Response, next: NextFunction) => {
    
-const categories = await Category.findOne();
+const categories = await Category.find();
 
         sendResponse(res, {
             message: "categories fetched",
