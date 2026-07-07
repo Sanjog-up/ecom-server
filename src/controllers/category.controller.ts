@@ -79,7 +79,7 @@ export const createCategory = catchAsync(async (req:Request, res: Response) => {
 //! update
 export const updateCategory = catchAsync( async (req: Request, res: Response) => {
         const { id } = req.params;
-        const { name, description } = req.body;
+        const { name, categoryRef } = req.body;
         const image = req.file as Express.Multer.File;
 
         const category = await Category.findOne({_id: id });
@@ -88,7 +88,7 @@ export const updateCategory = catchAsync( async (req: Request, res: Response) =>
         }
 
         if(name) category.name = name;
-        if(description) category.description = description;
+        if(categoryRef) category.category = categoryRef;
         if(image){
             const {path, public_id} = await sendFileToCloudinary(image, folder);
             await deleteFileFromCloudinary(category.image.public_id);

@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 
 interface ICategorySchema extends Document{
     name: string;
-    description?: string;
+    category?: string;
     image: {
         path: string,
         public_id: string,
@@ -12,7 +12,7 @@ interface ICategorySchema extends Document{
 //! category schema
 const categorySchema = new mongoose.Schema<ICategorySchema>(
 {
-    // name: require, description
+    // name: require, category
     name: {
         type: String,
         required: [true, "name is required"],
@@ -20,7 +20,7 @@ const categorySchema = new mongoose.Schema<ICategorySchema>(
         trim: true,
     },
     
-        description: {
+        category: {
             type: String,
             trim: true,
             minLength: [24, "minimum 25 character is required"],

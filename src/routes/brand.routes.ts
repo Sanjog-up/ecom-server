@@ -21,7 +21,7 @@ const upload = multerUploader();
 router.post("/", upload.single("brand_logo"), createBrand);
 
 //? update brand
-router.put("/:id", upload.single("brand_logo"), updateBrand);
+router.patch("/:id", upload.single("brand_logo"), updateBrand);
 
 //? delete
 router.delete("/:id", deleteBrand);
