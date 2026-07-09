@@ -1,8 +1,8 @@
 import express from "express";
-import { changeProfilePitcure, login, register, changePassword } from "../controllers/auth.controller";
+import { changeProfilePitcure, login, register, changePassword, getProfile, logout } from "../controllers/auth.controller";
 import { multerUploader } from "../middlewares/multer.middleware";
 import { authenticate } from "../middlewares/auth.middleware";
-import { All_Users, Role } from "../types/enum.types";
+import { All_Users } from "../types/enum.types";
 
 const router = express.Router();
 
@@ -24,5 +24,8 @@ router.put(
     authenticate(All_Users),
     changeProfilePitcure,
 );
+
+router.get("/me", authenticate(All_Users), getProfile);
+router.get("/logout", authenticate(All_Users), logout);
 
 export default router;

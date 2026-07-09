@@ -15,7 +15,7 @@ router.get("/:id", brand_controller_1.getById);
 const upload = (0, multer_middleware_1.multerUploader)();
 router.post("/", upload.single("brand_logo"), brand_controller_1.createBrand);
 //? update brand
-router.put("/:id", upload.single("brand_logo"), brand_controller_1.updateBrand);
+router.patch("/:id", upload.single("brand_logo"), brand_controller_1.updateBrand);
 //? delete
 router.delete("/:id", brand_controller_1.deleteBrand);
 exports.default = router;

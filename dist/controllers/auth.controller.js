@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.changePassword = exports.changeProfilePitcure = exports.login = exports.register = void 0;
+exports.logout = exports.getProfile = exports.changePassword = exports.changeProfilePitcure = exports.login = exports.register = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const sendResponse_utils_1 = require("../utils/sendResponse.utils");
@@ -61,7 +61,7 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
 });
 //! login
 exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
-    console.log("logib");
+    console.log("login");
     //* login
     //* email password <- req.body
     const { email, password } = req.body;
@@ -184,3 +184,34 @@ exports.changePassword = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
     });
 });
 //! handle profile image
+exports.getProfile = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const user = await user_model_1.default.findOne({
+        _id: req?.user?._id,
+        email: req?.user?.email,
+    });
+    if (!user) {
+        throw new appError_utils_1.default("user account not found", 400);
+    }
+    //! send response 
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: "profile fetched",
+        data: user,
+        statusCode: 200,
+    });
+});
+//* logout
+exports.logout = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    res.clearCookie("access_token", {
+        httpOnly: env_config_1.default.node_env === "development" ? false : true,
+        maxAge: Date.now(),
+        secure: env_config_1.default.node_env === "development" ? false : true,
+        sameSite: env_config_1.default.node_env === "development" ? "lax" : "none",
+        path: "/",
+    });
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: "Logged out successfully",
+        statusCode: 200,
+        data: null,
+    });
+});
+//! change passowrd 

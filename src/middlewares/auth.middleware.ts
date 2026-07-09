@@ -42,6 +42,7 @@ export const authenticate = (roles?: Role[]) => {
         throw new AppError("Token expired. Access denied", 401);
       }
 
+      console.log("user role:", decoded_data.role, "| allowed roles:", roles);
       if (roles && !roles.includes(decoded_data.role)) {
         throw new AppError("Forbidden. Access denied", 403);
       }

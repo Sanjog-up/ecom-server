@@ -1,3 +1,4 @@
+
 import User from "../models/user.model";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { Role } from "../types/enum.types";
@@ -71,7 +72,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 
 //! login
 export const login = catchAsync(async (req: Request, res: Response) => {
-  console.log("logib");
+  console.log("login");
 
   //* login
   //* email password <- req.body
@@ -229,3 +230,38 @@ export const changePassword = catchAsync(
   },
 );
 //! handle profile image
+export  const getProfile = catchAsync(async (req: Request, res: Response) => {
+  const user = await User.findOne({
+    _id: req?.user?._id,
+    email: req?.user?.email,
+  });
+  if(!user){
+    throw new AppError("user account not found", 400);
+  }
+  //! send response 
+  sendResponse(res, {
+    message: "profile fetched",
+    data: user,
+    statusCode: 200,
+  }) ;
+});
+
+//* logout
+
+export const logout = catchAsync(async (req:Request, res:Response) => {
+  
+  res.clearCookie("access_token", {
+    httpOnly: ENV_CONFIG.node_env === "development" ? false : true,
+    maxAge: Date.now(),
+    secure: ENV_CONFIG.node_env === "development" ? false : true,
+    sameSite: ENV_CONFIG.node_env === "development" ? "lax" : "none",
+    path: "/",
+  });
+  sendResponse(res,{
+  message: "Logged out successfully",
+  statusCode: 200,
+  data: null,
+  })
+})
+
+//! change passowrd 

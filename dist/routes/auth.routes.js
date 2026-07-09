@@ -18,4 +18,6 @@ router.post("/login", auth_controller_1.login);
 router.patch("/change-password", (0, auth_middleware_1.authenticate)(enum_types_1.All_Users), auth_controller_1.changePassword);
 //! change profile image
 router.put("/change-profile-image", upload.single("profile_image"), (0, auth_middleware_1.authenticate)(enum_types_1.All_Users), auth_controller_1.changeProfilePitcure);
+router.get("/me", (0, auth_middleware_1.authenticate)(enum_types_1.All_Users), auth_controller_1.getProfile);
+router.get("/logout", (0, auth_middleware_1.authenticate)(enum_types_1.All_Users), auth_controller_1.logout);
 exports.default = router;

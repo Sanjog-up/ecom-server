@@ -17,7 +17,7 @@ router.get("/:id", category_controller_1.getById);
 //? create category 
 router.post("/", (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), upload.single("image"), category_controller_1.createCategory);
 //? update category 
-router.put("/:id", (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), upload.single("image"), category_controller_1.updateCategory);
+router.patch("/:id", (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), upload.single("image"), category_controller_1.updateCategory);
 //? delete  
 router.delete("/:id", (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), category_controller_1.deleteCategory);
 exports.default = router;

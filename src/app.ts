@@ -2,18 +2,16 @@ import express, { NextFunction, Request, Response } from "express";
 import { errorHandler } from "./middlewares/errorHandler.middlewares";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import ENV_CONFIG from "./config/env.config";
-
 
 //! importing routes
 import routes from "./routes";
 import AppError from "./utils/appError.utils";
-
+import ENV_CONFIG from "./config/env.config";
 
 //! creating express app instance
 const app = express();
 
-const origins = ENV_CONFIG.allow_origin.split(",");
+const origins = ENV_CONFIG.allow_origin.split(",") ?? []; 
 console.log(origins);
 
 //! using middlewares
@@ -44,7 +42,7 @@ app.use(
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded());
 
-//! helth route
+//! health route
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
     message: "server is up and running",
