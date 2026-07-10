@@ -7,10 +7,7 @@ import { sendResponse } from "../utils/sendResponse.utils";
 import { catchAsync } from "../utils/catchAsync.utils";
 import { comparePassword, hashPassword } from "../utils/bcrypt.utilis";
 import { generateJwtToken } from "../utils/jwt.utilis";
-import {
-  deleteFileFromCloudinary,
-  sendFileToCloudinary,
-} from "../utils/cloudinary.utils";
+import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 import ENV_CONFIG from "../config/env.config";
 import { sendEmail } from "../utils/sendEmail.utils";
 import { generateLoginSuccessEmailHtml } from "../utils/email.utils";
@@ -246,8 +243,8 @@ export  const getProfile = catchAsync(async (req: Request, res: Response) => {
   }) ;
 });
 
-//* logout
 
+//* logout
 export const logout = catchAsync(async (req:Request, res:Response) => {
   
   res.clearCookie("access_token", {
