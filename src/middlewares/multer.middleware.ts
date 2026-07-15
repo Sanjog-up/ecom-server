@@ -3,8 +3,6 @@ import path from "path";
 import fs from "fs";
 import AppError from "../utils/appError.utils";
 
-
-
 export const multerUploader = () => {
     //! upload folder 
     const uploadFolder = path.join(process.cwd(), "uploadss");

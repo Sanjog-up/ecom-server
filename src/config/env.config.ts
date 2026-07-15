@@ -28,5 +28,4 @@ const ENV_CONFIG = {
     //! origins
     allow_origin: process.env.ALLOW_ORIGIN!!, 
 };
-
 export default ENV_CONFIG;

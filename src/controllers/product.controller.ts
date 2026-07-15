@@ -12,29 +12,24 @@ import { getPagination } from "../utils/pagination.utils";
 const folders =  "/products";
 //* get all products
 export const getAll = catchAsync(async(req: Request, res: Response)=>{
-  const { query, category, brand , minPrice, maxPrice, limit = "10", page = "1" } = req.query;
+  const { sort = "-createdAt", query, category, brand , minPrice, maxPrice, limit = "10", page = "1" } = req.query;
     const filter: mongoose.QueryFilter<any> = {};
   const perPage = Number(limit);
   const currentPage = Number(page);
   const skip = (currentPage - 1) * perPage;
-  // c_page : 1, skip:0, 1-10
-  // 2, 10, 11-20
-  // 3, 20, 21-30
-  
+
     if(query){
       filter.$or = [
         { name: { $regex: query, $options: "i" } },
         { description: { $regex: query, $options: "i" }, },
       ];
     }
-
     if(category){
       filter.category = category;
     }
     if(brand){
       filter.brand = brand;
     }
-
     //! price filter
     if(minPrice || maxPrice){
       filter.price = {};
@@ -49,8 +44,7 @@ export const getAll = catchAsync(async(req: Request, res: Response)=>{
       }
     }; 
 
-
-    const products = await Product.find(filter).skip(skip).limit(perPage);
+    const products = await Product.find(filter).sort(sort as string).skip(skip).limit(perPage);
 
     const count = await Product.countDocuments(filter);
 
