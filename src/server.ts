@@ -13,5 +13,4 @@ connectDatabase(ENV_CONFIG.db_uri)
 })
 .catch((err)=> {
   console.log(`Failed to connect to databse, existing:`, err);
-  process.exit(1);
 })
