@@ -113,7 +113,8 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   };
   const access_token = generateJwtToken(payload);
 
-  await sendEmail({
+  // await
+   sendEmail({
     to: user.email,
     subject: `Welcome ${user.full_name}`,
     html: generateLoginSuccessEmailHtml(req, {
@@ -121,7 +122,9 @@ export const login = catchAsync(async (req: Request, res: Response) => {
       _id: user._id,
       email: user.email,
     }),
-  });
+  }).catch((err)=> {
+    console.log("Failed to send login email:", err)
+  })
 
   //* send access_token in cookie
   res.cookie("access_token", access_token, {
