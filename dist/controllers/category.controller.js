@@ -67,7 +67,7 @@ exports.createCategory = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
 //! update
 exports.updateCategory = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     const { id } = req.params;
-    const { name, categoryRef } = req.body;
+    const { name, description } = req.body;
     const image = req.file;
     const category = await category_model_1.default.findOne({ _id: id });
     if (!category) {
@@ -75,8 +75,8 @@ exports.updateCategory = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
     }
     if (name)
         category.name = name;
-    if (categoryRef)
-        category.category = categoryRef;
+    if (description)
+        category.description = description;
     if (image) {
         const { path, public_id } = await (0, cloudinary_utils_1.sendFileToCloudinary)(image, folder);
         await (0, cloudinary_utils_1.deleteFileFromCloudinary)(category.image.public_id);

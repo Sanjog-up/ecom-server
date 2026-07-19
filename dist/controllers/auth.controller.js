@@ -98,7 +98,8 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         role: user.role,
     };
     const access_token = (0, jwt_utilis_1.generateJwtToken)(payload);
-    await (0, sendEmail_utils_1.sendEmail)({
+    // await
+    (0, sendEmail_utils_1.sendEmail)({
         to: user.email,
         subject: `Welcome ${user.full_name}`,
         html: (0, email_utils_1.generateLoginSuccessEmailHtml)(req, {
@@ -106,6 +107,8 @@ exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
             _id: user._id,
             email: user.email,
         }),
+    }).catch((err) => {
+        console.log("Failed to send login email:", err);
     });
     //* send access_token in cookie
     res.cookie("access_token", access_token, {

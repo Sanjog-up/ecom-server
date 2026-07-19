@@ -229,7 +229,7 @@ export const changePassword = catchAsync(
     });
   },
 );
-//! handle profile image
+//! get profile
 export  const getProfile = catchAsync(async (req: Request, res: Response) => {
   const user = await User.findOne({
     _id: req?.user?._id,
@@ -245,6 +245,8 @@ export  const getProfile = catchAsync(async (req: Request, res: Response) => {
     statusCode: 200,
   }) ;
 });
+
+
 
 
 //* logout

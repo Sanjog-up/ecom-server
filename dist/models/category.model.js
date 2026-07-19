@@ -13,7 +13,7 @@ const categorySchema = new mongoose_1.default.Schema({
         minLength: [3, "Category name must be 3 characters long"],
         trim: true,
     },
-    category: {
+    description: {
         type: String,
         trim: true,
         minLength: [24, "minimum 25 character is required"],

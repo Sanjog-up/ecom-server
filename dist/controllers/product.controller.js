@@ -15,14 +15,11 @@ const pagination_utils_1 = require("../utils/pagination.utils");
 const folders = "/products";
 //* get all products
 exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
-    const { query, category, brand, minPrice, maxPrice, limit = "10", page = "1" } = req.query;
+    const { sort = "-createdAt", query, category, brand, minPrice, maxPrice, limit = "10", page = "1" } = req.query;
     const filter = {};
     const perPage = Number(limit);
     const currentPage = Number(page);
     const skip = (currentPage - 1) * perPage;
-    // c_page : 1, skip:0, 1-10
-    // 2, 10, 11-20
-    // 3, 20, 21-30
     if (query) {
         filter.$or = [
             { name: { $regex: query, $options: "i" } },
@@ -50,7 +47,7 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         }
     }
     ;
-    const products = await product_model_1.default.find(filter).skip(skip).limit(perPage);
+    const products = await product_model_1.default.find(filter).sort(sort).skip(skip).limit(perPage);
     const count = await product_model_1.default.countDocuments(filter);
     (0, sendResponse_utils_1.sendResponse)(res, {
         message: `Products fetched successfully`,
