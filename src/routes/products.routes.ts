@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { getAll, getById, getByCategory, create, getFeaturedProducts, getNewArrivals, remove } from '../controllers/product.controller';
+import { getAll, getById, getByCategory, create, getFeaturedProducts, getNewArrivals, remove, update } from '../controllers/product.controller';
 import { authenticate } from '../middlewares/auth.middleware';
 import { Only_Admins } from '../types/enum.types';
 import { multerUploader } from '../middlewares/multer.middleware';
@@ -37,5 +37,14 @@ router.post("/",
 
  //? remove
     router.delete("/:id", authenticate(Only_Admins), remove);
+
+//? update
+router.patch("/:id",
+    upload.fields([{ name: "cover_image", maxCount: 1},
+        {name: "images", maxCount:5}
+    ]),
+    authenticate(Only_Admins),
+    update
+) 
 
 export default router;

@@ -214,3 +214,35 @@ export const getNewArrivals = catchAsync(async(req: Request, res: Response)=>{
     data: products,
   });
 });
+
+export const update = catchAsync(async(req: Request, res: Response)=> {
+  const { id } = req.params;
+  const { name, description , price, stock, category, brand, featured, new_arrival } = req.body;
+  const product = await Product.findOne({ _id: id});
+  if(!product) 
+    throw new AppError(`Product 4{id} not found`, 400);
+
+  if(name) product.name = name;
+  if(description) product.description = description;
+  if(price) product.price = price;
+  if(stock) product.stock = stock;
+  if(category) product.category = category;
+  if(brand) product.brand = brand;
+  if(featured !== undefined) product.featured = featured;
+  if(new_arrival !== undefined) product.new_arrival = new_arrival;
+
+  const { image, cover_image } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
+
+  if(cover_image?.[0]){
+    await deleteFileFromCloudinary(product.cover_image.public_id);
+    const { path, public_id } = await sendFileToCloudinary(cover_image[0], folders);
+    product.cover_image = {path, public_id}
+  }
+  await product.save();
+
+  sendResponse(res, {
+    message: `Product ${id} updated`, 
+    statusCode: 200,
+    data: product
+  })
+});

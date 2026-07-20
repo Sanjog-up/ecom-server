@@ -59,7 +59,7 @@ export const createCategory = catchAsync(async (req:Request, res: Response) => {
         // todo: handle image
         //! upload image to cloud
         const { path, public_id } = await sendFileToCloudinary(image, folder);
-        
+
         //! assign image to category 
         category.image = {
             path,
@@ -91,7 +91,8 @@ export const updateCategory = catchAsync( async (req: Request, res: Response) =>
         if(description) category.description = description;
         if(image){
             const {path, public_id} = await sendFileToCloudinary(image, folder);
-            await deleteFileFromCloudinary(category.image.public_id);
+            if(category.image?.public_id){
+            await deleteFileFromCloudinary(category.image.public_id)}
             category.image = {
                 public_id,
                 path
@@ -109,7 +110,8 @@ export const updateCategory = catchAsync( async (req: Request, res: Response) =>
      });
 
 //! delete 
-export const deleteCategory = catchAsync(async(req: Request, res: Response) =>{        const { id }= req.params;
+export const deleteCategory = catchAsync(async(req: Request, res: Response) =>{        
+    const { id }= req.params;
 
         const category = await Category.findOne({_id: id});
 
@@ -117,7 +119,8 @@ export const deleteCategory = catchAsync(async(req: Request, res: Response) =>{ 
             throw new AppError(`category ${id} not found`, 400);
         }
 
-        await deleteFileFromCloudinary(category.image.public_id);
+        if(category.image?.public_id){
+        await deleteFileFromCloudinary(category.image.public_id)};
 
         await category.deleteOne();
 
