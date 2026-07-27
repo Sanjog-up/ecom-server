@@ -69,8 +69,6 @@ export const register = catchAsync(async (req: Request, res: Response) => {
 
 //! login
 export const login = catchAsync(async (req: Request, res: Response) => {
-  console.log("login");
-
   //* login
   //* email password <- req.body
   const { email, password } = req.body;

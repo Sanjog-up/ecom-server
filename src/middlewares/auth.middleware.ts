@@ -14,7 +14,7 @@ export const authenticate = (roles?: Role[]) => {
 
       if(!access_token){
         const authHeader = req.headers.authorization;
-        if (authHeader && authHeader.startsWith("Bearer ")) {
+        if (authHeader && authHeader.startsWith("Bearer")) {
         access_token = authHeader.split(" ")[1];
             }
         }
