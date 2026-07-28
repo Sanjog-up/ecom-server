@@ -81,7 +81,7 @@ export const addToCart = catchAsync(async(req:Request, res:Response) => {
       sendResponse(res, {
         message: "Product added to cart",
         data: {cart},
-        statusCode: 2001,
+        statusCode: 201,
       })
 })
 
