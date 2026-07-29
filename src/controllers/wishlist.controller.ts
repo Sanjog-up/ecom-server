@@ -8,7 +8,7 @@ import Product from '../models/product.model';
 //! add/remove product from wishlist 
 export const addorremoveToWishlist = catchAsync(async(req: Request, res: Response) => {
     const userId = req.user._id;
-    const { productId } = req.body;
+    const { productId } = req.params as {productId: string};
 
     if(!userId || !productId){
         throw new AppError("userId and productId are required", 400);
