@@ -12,9 +12,11 @@ export const errorHandler = (error: any,
 
     console.log(error.name);
     console.log(error.message);
-    //! 
-    if(error instanceof AppError)
-        message = error.message;
+
+    // //! 
+    // if(error instanceof AppError)
+    //     message = error.message;
+    
     //! validation error
     if(error.name === "ValidationError"){
         console.log();
