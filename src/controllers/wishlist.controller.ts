@@ -59,7 +59,7 @@ export const getWishlist = catchAsync(async (req: Request, res: Response) => {
 
 //! clear wishlist 
 export const clearWishlist = catchAsync(async (req: Request, res: Response) => {
-    const { userId } = req.params;
+    const userId = req.user._id;
 
     if (!userId) {
         throw new AppError("userId is required", 400);
