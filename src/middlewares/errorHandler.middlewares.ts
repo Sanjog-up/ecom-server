@@ -16,7 +16,7 @@ export const errorHandler = (error: any,
     // //! 
     // if(error instanceof AppError)
     //     message = error.message;
-    
+
     //! validation error
     if(error.name === "ValidationError"){
         console.log();
@@ -33,6 +33,20 @@ export const errorHandler = (error: any,
         statusCode = 400;
         status = "fail";
     } 
+    
+    //! bad objectId or get/products/not-an-id 
+    if(error.name === "CastError"){
+        message= `Invalid ${error.path}: ${error.value}`;
+        statusCode = 400;
+        status = "fail";
+    }
+    //! duplicate key or registering with an existing email 
+    if(error.name === 11000){
+        const field = Object.keys(error.keyValue)[0];
+        message= `${field} already exists`;
+        statusCode = 409;
+        status = "fail";
+    }
 
     //*  error response
     res.status(statusCode).json({
