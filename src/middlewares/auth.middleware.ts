@@ -60,3 +60,9 @@ export const authenticate = (roles?: Role[]) => {
     }
   };
 };
+
+export const requireVerified = async(req:Request, res:Response, next:NextFunction) => {
+  if(!req.user?.is_verified){
+    return next(new AppError("please verify your email to continue", 403))
+  }
+}
