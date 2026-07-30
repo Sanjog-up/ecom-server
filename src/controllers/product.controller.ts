@@ -33,15 +33,10 @@ export const getAll = catchAsync(async(req: Request, res: Response)=>{
     //! price filter
     if(minPrice || maxPrice){
       filter.price = {};
-      if(minPrice){
-        filter.price = {
-          $gte: Number(minPrice)};
-      }
-      if(maxPrice){
-        filter.price = {
-          $lte : Number(maxPrice),
-        };
-      }
+      if(minPrice)
+        filter.price.$gte = Number(minPrice);
+      if(maxPrice)
+        filter.price.$lte = Number(maxPrice);
     }; 
 
     const products = await Product.find(filter).sort(sort as string).skip(skip).limit(perPage);

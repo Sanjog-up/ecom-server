@@ -1,4 +1,3 @@
-
 import User from "../models/user.model";
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import { Role } from "../types/enum.types";
@@ -10,8 +9,10 @@ import { generateJwtToken } from "../utils/jwt.utilis";
 import { deleteFileFromCloudinary, sendFileToCloudinary } from "../utils/cloudinary.utils";
 import ENV_CONFIG from "../config/env.config";
 import { sendEmail } from "../utils/sendEmail.utils";
-import { generateLoginSuccessEmailHtml } from "../utils/email.utils";
 import jwt from "jsonwebtoken";
+import { generateVerificationEmailHtml } from '../utils/email.verify';
+import crypto from "crypto";
+import { generateLoginSuccessEmailHtml } from "../utils/email.utils";
 
 const folder = "/profile_image";
 //! register
@@ -27,6 +28,10 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   }
   if (!password) {
     throw new AppError("password is required", 404);
+  }
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if(!emailRegex.test(email)){
+    throw new AppError("please provide a valid email address", 400);
   }
   //* create User instance
   const user = new User({ full_name, email, password, phone, role });
@@ -47,6 +52,18 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   //* save user
   await user.save();
 
+  //* generate token for verification
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.verification_token = crypto.createHash("sha256").update(rawToken).digest("hex");
+  user.verificationTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  
+  const verifyUrl = `${ENV_CONFIG.allow_origin}/verify-email/${rawToken}`;
+  sendEmail({
+    to: user.email,
+    subject: "Verify your Grey Matter account",
+    html: generateVerificationEmailHtml({ full_name: user.full_name}, verifyUrl),
+  }).catch((err)=> console.log("Failed to send verification email:", err));
+
   //* generate access token -> jwt
   const token = jwt.sign(
     {
@@ -54,6 +71,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
       role: user.role,
       email: user.email,
       full_name: user.full_name,
+      is_verified: user.is_verified,
     },
     ENV_CONFIG.jwt_secret as string,
     { expiresIn: "7d" },
@@ -264,4 +282,64 @@ export const logout = catchAsync(async (req:Request, res:Response) => {
   })
 })
 
+//! verify email
+export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
+  const { token } = req.params;
+  if (!token || Array.isArray(token)) {
+    throw new AppError("verification token is required", 400);
+  }
+
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  const user = await User.findOne({
+    verification_token: hashedToken,
+    verification_token_expires: { $gt: new Date() },
+  }).select("+verification_token +verification_token_expires");
+
+  if (!user) {
+    throw new AppError("invalid or expired verification link", 400);
+  }
+
+  user.is_verified = true;
+  user.verification_token = undefined;
+  user.verificationTokenExp = undefined;
+  await user.save();
+
+  sendResponse(res, {
+    message: "email verified successfully",
+    data: null,
+    statusCode: 200,
+  });
+});
+
+//! resend verification email
+export const resendVerification = catchAsync(async (req: Request, res: Response) => {
+  const id = req.user?._id;
+  const user = await User.findOne({ _id: id });
+
+  if (!user) {
+    throw new AppError("user account not found", 400);
+  }
+  if (user.is_verified) {
+    throw new AppError("email is already verified", 400);
+  }
+
+  const rawToken = crypto.randomBytes(32).toString("hex");
+  user.verification_token = crypto.createHash("sha256").update(rawToken).digest("hex");
+  user.verificationTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
+  await user.save();
+
+  const verifyUrl = `${ENV_CONFIG.allow_origin}/verify-email/${rawToken}`;
+  await sendEmail({
+    to: user.email,
+    subject: "Verify your Grey Matter account",
+    html: generateVerificationEmailHtml({ full_name: user.full_name }, verifyUrl),
+  });
+
+  sendResponse(res, {
+    message: "verification email resent",
+    data: null,
+    statusCode: 200,
+  });
+});
 //! change passowrd 
