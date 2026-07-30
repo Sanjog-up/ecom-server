@@ -49,8 +49,6 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     };
   }
 
-  //* save user
-  await user.save();
 
   //* generate token for verification
   const rawToken = crypto.randomBytes(32).toString("hex");
@@ -63,6 +61,11 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     subject: "Verify your Grey Matter account",
     html: generateVerificationEmailHtml({ full_name: user.full_name}, verifyUrl),
   }).catch((err)=> console.log("Failed to send verification email:", err));
+
+
+
+  //* save user
+  await user.save();
 
   //* generate access token -> jwt
   const token = jwt.sign(
@@ -293,8 +296,8 @@ export const verifyEmail = catchAsync(async (req: Request, res: Response) => {
 
   const user = await User.findOne({
     verification_token: hashedToken,
-    verification_token_expires: { $gt: new Date() },
-  }).select("+verification_token +verification_token_expires");
+    verificationTokenExp: { $gt: new Date() },
+  }).select("+verification_token +verificationTokenExp");
 
   if (!user) {
     throw new AppError("invalid or expired verification link", 400);

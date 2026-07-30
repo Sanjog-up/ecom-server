@@ -65,4 +65,5 @@ export const requireVerified = async(req:Request, res:Response, next:NextFunctio
   if(!req.user?.is_verified){
     return next(new AppError("please verify your email to continue", 403))
   }
+  next();
 }
