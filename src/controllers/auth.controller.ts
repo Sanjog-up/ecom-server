@@ -60,7 +60,8 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     to: user.email,
     subject: "Verify your Grey Matter account",
     html: generateVerificationEmailHtml({ full_name: user.full_name}, verifyUrl),
-  }).catch((err)=> console.log("Failed to send verification email:", err));
+  })
+  .catch((err)=> console.log("Failed to send verification email:", err));
 
 
 
@@ -79,6 +80,14 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     ENV_CONFIG.jwt_secret as string,
     { expiresIn: "7d" },
   );
+
+  // accestoken will be sent in cookie
+    res.cookie("access_token", token, {
+    httpOnly: ENV_CONFIG.node_env === "development" ? false : true,
+    maxAge: parseInt(ENV_CONFIG.cookie_express ?? "7") * 24 * 60 * 60 * 1000,
+    secure: ENV_CONFIG.node_env === "development" ? false : true,
+    sameSite: ENV_CONFIG.node_env === "development" ? "lax" : "none",
+  });
 
   //* success response
   sendResponse(res, {

@@ -58,7 +58,8 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         to: user.email,
         subject: "Verify your Grey Matter account",
         html: (0, email_verify_1.generateVerificationEmailHtml)({ full_name: user.full_name }, verifyUrl),
-    }).catch((err) => console.log("Failed to send verification email:", err));
+    })
+        .catch((err) => console.log("Failed to send verification email:", err));
     //* save user
     await user.save();
     //* generate access token -> jwt
@@ -69,6 +70,13 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         full_name: user.full_name,
         is_verified: user.is_verified,
     }, env_config_1.default.jwt_secret, { expiresIn: "7d" });
+    // accestoken will be sent in cookie
+    res.cookie("access_token", token, {
+        httpOnly: env_config_1.default.node_env === "development" ? false : true,
+        maxAge: parseInt(env_config_1.default.cookie_express ?? "7") * 24 * 60 * 60 * 1000,
+        secure: env_config_1.default.node_env === "development" ? false : true,
+        sameSite: env_config_1.default.node_env === "development" ? "lax" : "none",
+    });
     //* success response
     (0, sendResponse_utils_1.sendResponse)(res, {
         message: "Account created",
