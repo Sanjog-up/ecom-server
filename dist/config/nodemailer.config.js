@@ -7,9 +7,10 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const env_config_1 = __importDefault(require("./env.config"));
 //! transported
 const transporter = nodemailer_1.default.createTransport({
-    host: env_config_1.default.smtp_host,
-    service: env_config_1.default.smtp_service,
-    port: Number(env_config_1.default.smtp_port) ?? 587,
+    // host: ENV_CONFIG.smtp_host,
+    // service: ENV_CONFIG.smtp_service,
+    service: 'gmail',
+    port: Number(env_config_1.default.smtp_port) || 587,
     secure: Number(env_config_1.default.smtp_port) === 465,
     auth: {
         user: env_config_1.default.smtp_user,

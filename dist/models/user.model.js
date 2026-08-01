@@ -29,6 +29,18 @@ const userSchema = new mongoose_1.default.Schema({
         type: String,
         minLength: [10, "phone must be 10 digits"],
     },
+    is_verified: {
+        type: Boolean,
+        default: false,
+    },
+    verification_token: {
+        type: String,
+        select: false,
+    },
+    verificationTokenExp: {
+        type: Date,
+        select: false,
+    },
     //! role
     role: {
         type: String,

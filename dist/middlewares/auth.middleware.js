@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authenticate = void 0;
+exports.requireVerified = exports.authenticate = void 0;
 const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const jwt_utilis_1 = require("../utils/jwt.utilis");
 const env_config_1 = __importDefault(require("../config/env.config"));
@@ -16,7 +16,7 @@ const authenticate = (roles) => {
             console.log(access_token);
             if (!access_token) {
                 const authHeader = req.headers.authorization;
-                if (authHeader && authHeader.startsWith("Bearer ")) {
+                if (authHeader && authHeader.startsWith("Bearer")) {
                     access_token = authHeader.split(" ")[1];
                 }
             }
@@ -60,3 +60,10 @@ const authenticate = (roles) => {
     };
 };
 exports.authenticate = authenticate;
+const requireVerified = async (req, res, next) => {
+    if (!req.user?.is_verified) {
+        return next(new appError_utils_1.default("please verify your email to continue", 403));
+    }
+    next();
+};
+exports.requireVerified = requireVerified;

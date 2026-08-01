@@ -30,4 +30,8 @@ router.post("/", upload.fields([
 ]), (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), product_controller_1.create);
 //? remove
 router.delete("/:id", (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), product_controller_1.remove);
+//? update
+router.patch("/:id", upload.fields([{ name: "cover_image", maxCount: 1 },
+    { name: "images", maxCount: 5 }
+]), (0, auth_middleware_1.authenticate)(enum_types_1.Only_Admins), product_controller_1.update);
 exports.default = router;

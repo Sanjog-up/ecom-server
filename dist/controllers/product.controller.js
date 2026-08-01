@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getNewArrivals = exports.getFeaturedProducts = exports.remove = exports.create = exports.getByCategory = exports.getById = exports.getAll = void 0;
+exports.update = exports.getNewArrivals = exports.getFeaturedProducts = exports.remove = exports.create = exports.getByCategory = exports.getById = exports.getAll = void 0;
 const catchAsync_utils_1 = require("../utils/catchAsync.utils");
 const sendResponse_utils_1 = require("../utils/sendResponse.utils");
 const product_model_1 = __importDefault(require("../models/product.model"));
@@ -35,16 +35,10 @@ exports.getAll = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     //! price filter
     if (minPrice || maxPrice) {
         filter.price = {};
-        if (minPrice) {
-            filter.price = {
-                $gte: Number(minPrice)
-            };
-        }
-        if (maxPrice) {
-            filter.price = {
-                $lte: Number(maxPrice),
-            };
-        }
+        if (minPrice)
+            filter.price.$gte = Number(minPrice);
+        if (maxPrice)
+            filter.price.$lte = Number(maxPrice);
     }
     ;
     const products = await product_model_1.default.find(filter).sort(sort).skip(skip).limit(perPage);
@@ -169,5 +163,40 @@ exports.getNewArrivals = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
         message: `New arrivals fetched`,
         statusCode: 200,
         data: products,
+    });
+});
+exports.update = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const { id } = req.params;
+    const { name, description, price, stock, category, brand, featured, new_arrival } = req.body;
+    const product = await product_model_1.default.findOne({ _id: id });
+    if (!product)
+        throw new appError_utils_1.default(`Product 4{id} not found`, 400);
+    if (name)
+        product.name = name;
+    if (description)
+        product.description = description;
+    if (price)
+        product.price = price;
+    if (stock)
+        product.stock = stock;
+    if (category)
+        product.category = category;
+    if (brand)
+        product.brand = brand;
+    if (featured !== undefined)
+        product.featured = featured;
+    if (new_arrival !== undefined)
+        product.new_arrival = new_arrival;
+    const { image, cover_image } = req.files ?? {};
+    if (cover_image?.[0]) {
+        await (0, cloudinary_utils_1.deleteFileFromCloudinary)(product.cover_image.public_id);
+        const { path, public_id } = await (0, cloudinary_utils_1.sendFileToCloudinary)(cover_image[0], folders);
+        product.cover_image = { path, public_id };
+    }
+    await product.save();
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: `Product ${id} updated`,
+        statusCode: 200,
+        data: product
     });
 });

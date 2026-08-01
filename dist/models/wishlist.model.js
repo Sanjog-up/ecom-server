@@ -8,7 +8,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const wishlistSchema = new mongoose_1.default.Schema({
     productId: {
         type: mongoose_1.default.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "product",
         required: [true, "Product ID is required"]
     },
     user: {

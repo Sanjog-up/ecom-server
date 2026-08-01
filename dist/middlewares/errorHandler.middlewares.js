@@ -1,19 +1,15 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.errorHandler = void 0;
-const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const errorHandler = (error, req, res, next) => {
     let message = error?.message || "Internal server error";
     let statusCode = error?.statusCode || 500;
     let status = error?.status || "error";
     console.log(error.name);
     console.log(error.message);
-    //! 
-    if (error instanceof appError_utils_1.default)
-        message = error.message;
+    // //! 
+    // if(error instanceof AppError)
+    //     message = error.message;
     //! validation error
     if (error.name === "ValidationError") {
         console.log();
@@ -27,6 +23,19 @@ const errorHandler = (error, req, res, next) => {
     if (error.name === "MongooseError") {
         message = error.message;
         statusCode = 400;
+        status = "fail";
+    }
+    //! bad objectId or get/products/not-an-id 
+    if (error.name === "CastError") {
+        message = `Invalid ${error.path}: ${error.value}`;
+        statusCode = 400;
+        status = "fail";
+    }
+    //! duplicate key or registering with an existing email 
+    if (error.name === 11000) {
+        const field = Object.keys(error.keyValue)[0];
+        message = `${field} already exists`;
+        statusCode = 409;
         status = "fail";
     }
     //*  error response

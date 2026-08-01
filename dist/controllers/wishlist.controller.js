@@ -12,7 +12,7 @@ const product_model_1 = __importDefault(require("../models/product.model"));
 //! add/remove product from wishlist 
 exports.addorremoveToWishlist = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     const userId = req.user._id;
-    const { productId } = req.body;
+    const { productId } = req.params;
     if (!userId || !productId) {
         throw new appError_utils_1.default("userId and productId are required", 400);
     }
@@ -53,7 +53,7 @@ exports.getWishlist = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
 });
 //! clear wishlist 
 exports.clearWishlist = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
-    const { userId } = req.params;
+    const userId = req.user._id;
     if (!userId) {
         throw new appError_utils_1.default("userId is required", 400);
     }

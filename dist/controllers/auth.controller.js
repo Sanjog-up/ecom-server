@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.getProfile = exports.changePassword = exports.changeProfilePitcure = exports.login = exports.register = void 0;
+exports.resendVerification = exports.verifyEmail = exports.logout = exports.getProfile = exports.changePassword = exports.changeProfilePitcure = exports.login = exports.register = void 0;
 const user_model_1 = __importDefault(require("../models/user.model"));
 const appError_utils_1 = __importDefault(require("../utils/appError.utils"));
 const sendResponse_utils_1 = require("../utils/sendResponse.utils");
@@ -13,8 +13,10 @@ const jwt_utilis_1 = require("../utils/jwt.utilis");
 const cloudinary_utils_1 = require("../utils/cloudinary.utils");
 const env_config_1 = __importDefault(require("../config/env.config"));
 const sendEmail_utils_1 = require("../utils/sendEmail.utils");
-const email_utils_1 = require("../utils/email.utils");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const email_verify_1 = require("../utils/email.verify");
+const crypto_1 = __importDefault(require("crypto"));
+const email_utils_1 = require("../utils/email.utils");
 const folder = "/profile_image";
 //! register
 exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
@@ -30,6 +32,10 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     if (!password) {
         throw new appError_utils_1.default("password is required", 404);
     }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        throw new appError_utils_1.default("please provide a valid email address", 400);
+    }
     //* create User instance
     const user = new user_model_1.default({ full_name, email, password, phone, role });
     //* hash password
@@ -43,6 +49,16 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
             public_id,
         };
     }
+    //* generate token for verification
+    const rawToken = crypto_1.default.randomBytes(32).toString("hex");
+    user.verification_token = crypto_1.default.createHash("sha256").update(rawToken).digest("hex");
+    user.verificationTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    const verifyUrl = `${env_config_1.default.allow_origin}/verify-email/${rawToken}`;
+    (0, sendEmail_utils_1.sendEmail)({
+        to: user.email,
+        subject: "Verify your Grey Matter account",
+        html: (0, email_verify_1.generateVerificationEmailHtml)({ full_name: user.full_name }, verifyUrl),
+    }).catch((err) => console.log("Failed to send verification email:", err));
     //* save user
     await user.save();
     //* generate access token -> jwt
@@ -51,6 +67,7 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         role: user.role,
         email: user.email,
         full_name: user.full_name,
+        is_verified: user.is_verified,
     }, env_config_1.default.jwt_secret, { expiresIn: "7d" });
     //* success response
     (0, sendResponse_utils_1.sendResponse)(res, {
@@ -61,7 +78,6 @@ exports.register = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
 });
 //! login
 exports.login = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
-    console.log("login");
     //* login
     //* email password <- req.body
     const { email, password } = req.body;
@@ -186,7 +202,7 @@ exports.changePassword = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
         statusCode: 200,
     });
 });
-//! handle profile image
+//! get profile
 exports.getProfile = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
     const user = await user_model_1.default.findOne({
         _id: req?.user?._id,
@@ -215,6 +231,56 @@ exports.logout = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
         message: "Logged out successfully",
         statusCode: 200,
         data: null,
+    });
+});
+//! verify email
+exports.verifyEmail = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const { token } = req.params;
+    if (!token || Array.isArray(token)) {
+        throw new appError_utils_1.default("verification token is required", 400);
+    }
+    const hashedToken = crypto_1.default.createHash("sha256").update(token).digest("hex");
+    const user = await user_model_1.default.findOne({
+        verification_token: hashedToken,
+        verificationTokenExp: { $gt: new Date() },
+    }).select("+verification_token +verificationTokenExp");
+    if (!user) {
+        throw new appError_utils_1.default("invalid or expired verification link", 400);
+    }
+    user.is_verified = true;
+    user.verification_token = undefined;
+    user.verificationTokenExp = undefined;
+    await user.save();
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: "email verified successfully",
+        data: null,
+        statusCode: 200,
+    });
+});
+//! resend verification email
+exports.resendVerification = (0, catchAsync_utils_1.catchAsync)(async (req, res) => {
+    const id = req.user?._id;
+    const user = await user_model_1.default.findOne({ _id: id });
+    if (!user) {
+        throw new appError_utils_1.default("user account not found", 400);
+    }
+    if (user.is_verified) {
+        throw new appError_utils_1.default("email is already verified", 400);
+    }
+    const rawToken = crypto_1.default.randomBytes(32).toString("hex");
+    user.verification_token = crypto_1.default.createHash("sha256").update(rawToken).digest("hex");
+    user.verificationTokenExp = new Date(Date.now() + 24 * 60 * 60 * 1000);
+    await user.save();
+    const verifyUrl = `${env_config_1.default.allow_origin}/verify-email/${rawToken}`;
+    await (0, sendEmail_utils_1.sendEmail)({
+        to: user.email,
+        subject: "Verify your Grey Matter account",
+        html: (0, email_verify_1.generateVerificationEmailHtml)({ full_name: user.full_name }, verifyUrl),
+    });
+    (0, sendResponse_utils_1.sendResponse)(res, {
+        message: "verification email resent",
+        data: null,
+        statusCode: 200,
     });
 });
 //! change passowrd 

@@ -79,7 +79,9 @@ exports.updateCategory = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
         category.description = description;
     if (image) {
         const { path, public_id } = await (0, cloudinary_utils_1.sendFileToCloudinary)(image, folder);
-        await (0, cloudinary_utils_1.deleteFileFromCloudinary)(category.image.public_id);
+        if (category.image?.public_id) {
+            await (0, cloudinary_utils_1.deleteFileFromCloudinary)(category.image.public_id);
+        }
         category.image = {
             public_id,
             path
@@ -101,7 +103,10 @@ exports.deleteCategory = (0, catchAsync_utils_1.catchAsync)(async (req, res) => 
     if (!category) {
         throw new appError_utils_1.default(`category ${id} not found`, 400);
     }
-    await (0, cloudinary_utils_1.deleteFileFromCloudinary)(category.image.public_id);
+    if (category.image?.public_id) {
+        await (0, cloudinary_utils_1.deleteFileFromCloudinary)(category.image.public_id);
+    }
+    ;
     await category.deleteOne();
     (0, sendResponse_utils_1.sendResponse)(res, {
         message: `category ${id} deleted`,
