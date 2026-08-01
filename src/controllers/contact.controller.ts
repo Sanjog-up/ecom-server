@@ -7,27 +7,39 @@ import { sendEmail } from "../utils/sendEmail.utils";
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export const sendContactMessage = catchAsync(async(req: Request, res:Response) => {
+export const sendContactMessage = catchAsync(
+  async (req: Request, res: Response) => {
     const { name, email, message } = req.body;
-    if(!name) throw new AppError("name is required", 400);
-    if(!email || !emailRegex.test(email)) throw new AppError("a valid email is required", 400);
-    if(!message) throw new AppError("message is required", 400);
+    if (!name) throw new AppError("name is required", 400);
+    if (!email || !emailRegex.test(email))
+      throw new AppError("a valid email is required", 400);
+    if (!message) throw new AppError("message is required", 400);
 
-    sendEmail({
+    try {
+      await sendEmail({
         to: ENV_CONFIG.smtp_user,
         subject: `New contact message from ${name}`,
         html: `
-        <h3>New Contact Form submission</h3>
-        <p><strong>Name:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
-        <p><strong>Message:</strong></p>
-        <p>${message}</p>
-        `,
-    });
+            <h3>New Contact Form submission</h3>
+            <p><strong>Name:</strong> ${name}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Message:</strong></p>
+            <p>${message}</p>
+            `,
+      });
+    } catch (err: any) {
+      console.log("failed to send email:", err);
+      throw new AppError(
+        err?.message ??
+          "Failed to send email. Please check SMTP configuration.",
+        500,
+      );
+    }
 
     sendResponse(res, {
-        message: "message sent successfully",
-        data: null,
-        statusCode: 200
-    })
-}) 
+      message: "message sent successfully",
+      data: null,
+      statusCode: 200,
+    });
+  },
+);
