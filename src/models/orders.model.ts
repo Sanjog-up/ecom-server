@@ -19,26 +19,14 @@ export interface IShippingAddress {
 }
 
 export interface IOrder extends Document {
-    // user: mongoose.Types.ObjectId;
-    // products: {
-    //     product: mongoose.Types.ObjectId;
-    //     quantity: number;
-    //     price: number;
-    // }[];
-    // totalPrice: number;
-    // status: "pending" | "shipped" | "delivered" | "cancelled";
-    // createdAt: Date;
-    // updatedAt: Date;
-
     user: mongoose.Types.ObjectId;
     items: IOrderItem[];
     shippingAddress: IShippingAddress;
-    quantity: number;
     totalPrice: number;
     status: "pending" | "shipped" | "delivered" | "cancelled";
     createdAt: Date;
     updatedAt: Date;
-    paymenMethod: "COD" | "Khalti";
+    paymentMethod: "COD" | "Khalti";
     paymentStatus: "Pending" | "Paid" | "Failed";
     khaltiPidx?: string;
 
@@ -53,10 +41,10 @@ const OrderSchema: Schema = new Schema(
                 name: {type: String, required: true},
                 cover_image: {
                     public_id: { type: String, required: true },
+                },
                 quantity: { type: Number, required: true, min: 1 },
                 price: { type: Number, required: true, min: 0 },
             },
-        },
         ],
         shippingAddress: {
             address: { type: String, required: true },
@@ -64,7 +52,7 @@ const OrderSchema: Schema = new Schema(
             full_name: { type: String, required: true },
             phone: { type: String, required: true },
         },
-        paymenMethod: { 
+        paymentMethod: { 
             type: String, 
             enum: ["COD", "Khalti"], 
             required: true 
