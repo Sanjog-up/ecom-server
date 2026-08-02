@@ -27,5 +27,10 @@ const ENV_CONFIG = {
 
     //! origins
     allow_origin: process.env.ALLOW_ORIGIN!!, 
+
+    //! khalti
+    khalti_secret_key: process.env.KHALTI_SECRET_KEY!!,
+    khalti_public_key: process.env.KHALTI_PUBLIC_KEY!!,
+    frontend_url: process.env.FRONTEND_URL!!,
 };
 export default ENV_CONFIG;
