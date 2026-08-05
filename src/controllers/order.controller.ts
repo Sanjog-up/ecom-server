@@ -56,6 +56,7 @@ export const createOrder = catchAsync(async (req: Request, res: Response) => {
 
   if (paymentMethod === "COD") {
     await decrementStock(items);
+    await order.save();
     cart.items.splice(0, cart.items.length);
     await cart.save();
 

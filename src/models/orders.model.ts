@@ -41,6 +41,7 @@ const OrderSchema: Schema = new Schema(
                 name: {type: String, required: true},
                 cover_image: {
                     public_id: { type: String, required: true },
+                    path: { type: String, required: true}
                 },
                 quantity: { type: Number, required: true, min: 1 },
                 price: { type: Number, required: true, min: 0 },

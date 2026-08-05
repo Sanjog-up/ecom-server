@@ -56,7 +56,7 @@ export const getAll = catchAsync(async(req: Request, res: Response)=>{
  export const getById = catchAsync(async(req: Request, res: Response)=>{
     const { id } = req.params;
 
-    const product = await Product.find({ _id: id});
+    const product = await Product.findOne({ _id: id});
 
       if (!product) {
     throw new AppError(`product ${id} not found `, 404);
