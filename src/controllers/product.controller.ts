@@ -220,36 +220,40 @@ export const update = catchAsync(async(req: Request, res: Response)=> {
   if(description) product.description = description;
   if(price) product.price = price;
   if(stock) product.stock = stock;
-  if(category) product.category = category;
-  if(brand) product.brand = brand;
   if(featured !== undefined) product.featured = featured;
   if(new_arrival !== undefined) product.new_arrival = new_arrival;
 
-  const { image, cover_image } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
-
-  const proCategory = await Category.findOne({ _id: category});
-  if(!proCategory){
+    if(category){
+      const proCategory = await Category.findOne({ _id: category});
+    if(!proCategory)
     throw new AppError(`Category not found`, 404);
-  }
-  const proBrand = await Brand.findOne({ _id: brand});
+    product.category = proCategory?._id;
+}
+  if(brand){
+     const proBrand = await Brand.findOne({ _id: brand});
   if(!proBrand){
     throw new AppError(`Brand not found`, 404);
   }
-  product.category = proCategory._id;
-  product.brand = proBrand._id;
+  }
 
-   //* cover image
-  const {path, public_id} = await sendFileToCloudinary(cover_image[0], folders );
-  product.cover_image = {
-    path,
-    public_id,
-  };
+  const { images, cover_images } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
 
-  if(cover_image?.[0]){
+  //  //* cover images
+  if(cover_images?.[0]){
+    if(product.cover_image?.public_id){
     await deleteFileFromCloudinary(product.cover_image.public_id);
-    const { path, public_id } = await sendFileToCloudinary(cover_image[0], folders);
+    }
+    const { path, public_id } = await sendFileToCloudinary(cover_images[0], folders);
     product.cover_image = {path, public_id}
   }
+
+  //* extra images
+  if(images && Array.isArray(images) && images.length > 0){
+    const files = await Promise.all(
+      images.map((file) => sendFileToCloudinary(file, folders))
+    );
+    product.images = files as any;
+  } 
   await product.save();
 
   sendResponse(res, {
