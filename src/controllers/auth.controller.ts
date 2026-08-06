@@ -21,13 +21,13 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   const image = req.file;
   console.log(image);
   if (!full_name) {
-    throw new AppError("full_name is required", 404);
+    throw new AppError("full_name is required", 400);
   }
   if (!email) {
-    throw new AppError("email is required", 404);
+    throw new AppError("email is required", 400);
   }
   if (!password) {
-    throw new AppError("password is required", 404);
+    throw new AppError("password is required", 400);
   }
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if(!emailRegex.test(email)){
@@ -108,14 +108,14 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     //   error.statusCode = 404;
     //   error.status = "fail";
     //   throw error;
-    throw new AppError("email is required", 404);
+    throw new AppError("email is required", 400);
   }
   if (!password) {
     // const error: any = new Error("password is required");
     // error.statusCode = 404;
     // error.status = "fail";
     // throw error;
-    throw new AppError("password is required", 404);
+    throw new AppError("password is required", 400);
   }
 
   // * find user by email
@@ -138,6 +138,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
     full_name: user.full_name,
     email: user.email,
     role: user.role,
+    is_verified: user.is_verified
   };
   const access_token = generateJwtToken(payload);
 
