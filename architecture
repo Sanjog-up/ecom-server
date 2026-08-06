@@ -1,0 +1,13 @@
+Browser (Next.js Client)
+        │
+        │  HTTP + Cookie / Bearer Token
+        ▼
+Express Server (/api/v1)
+        │
+        ├── Auth Routes → User Model + JWT + Email
+        ├── Product Routes → Product Model + Cloudinary
+        ├── Cart / Wishlist / Order Routes
+        └── Category / Brand Routes
+                │
+                ▼
+           MongoDB + Cloudinary
