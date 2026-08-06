@@ -34,7 +34,7 @@ export interface IOrder extends Document {
 
 const OrderSchema: Schema = new Schema(
     {
-        user: { type: mongoose.Types.ObjectId, ref: "User", required: true },
+        user: { type: mongoose.Types.ObjectId, ref: "user", required: true },
         items: [
             {
                 product: { type: mongoose.Types.ObjectId, ref: "product", required: true },
