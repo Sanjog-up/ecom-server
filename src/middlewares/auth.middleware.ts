@@ -53,6 +53,7 @@ export const authenticate = (roles?: Role[]) => {
         email: decoded_data.email,
         role: decoded_data.role,
         full_name: decoded_data.full_name,
+        is_verified: decoded_data.is_verified,
       };
       next();
     } catch (error) {

@@ -95,11 +95,9 @@ export const create = catchAsync(async(req: Request, res: Response)=>{
   } = req.body;
 
   //! files 
-  const { image, cover_image } = req.files as 
-  {
-    [fieldname: string]: Express.Multer.File[];
-
-  };
+  const { images, cover_image } = req.files as 
+  {[fieldname: string]: Express.Multer.File[]};
+  
   if(!name || !price || !stock){
     throw new AppError("name, price and stock are required", 400);
   }
@@ -139,8 +137,8 @@ export const create = catchAsync(async(req: Request, res: Response)=>{
   };
 
   //* images
-  if(image && Array.isArray(image) && image.length > 0){
-  const promises = image.map(
+  if(images && Array.isArray(images) && images.length > 0){
+  const promises = images.map(
     async (file) => await sendFileToCloudinary(file, folders)
   );
 
@@ -210,12 +208,13 @@ export const getNewArrivals = catchAsync(async(req: Request, res: Response)=>{
   });
 });
 
+//! update 
 export const update = catchAsync(async(req: Request, res: Response)=> {
   const { id } = req.params;
   const { name, description , price, stock, category, brand, featured, new_arrival } = req.body;
   const product = await Product.findOne({ _id: id});
   if(!product) 
-    throw new AppError(`Product 4{id} not found`, 400);
+    throw new AppError(`Product ${id} not found`, 404);
 
   if(name) product.name = name;
   if(description) product.description = description;
@@ -227,6 +226,24 @@ export const update = catchAsync(async(req: Request, res: Response)=> {
   if(new_arrival !== undefined) product.new_arrival = new_arrival;
 
   const { image, cover_image } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
+
+  const proCategory = await Category.findOne({ _id: category});
+  if(!proCategory){
+    throw new AppError(`Category not found`, 404);
+  }
+  const proBrand = await Brand.findOne({ _id: brand});
+  if(!proBrand){
+    throw new AppError(`Brand not found`, 404);
+  }
+  product.category = proCategory._id;
+  product.brand = proBrand._id;
+
+   //* cover image
+  const {path, public_id} = await sendFileToCloudinary(cover_image[0], folders );
+  product.cover_image = {
+    path,
+    public_id,
+  };
 
   if(cover_image?.[0]){
     await deleteFileFromCloudinary(product.cover_image.public_id);

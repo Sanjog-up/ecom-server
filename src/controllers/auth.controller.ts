@@ -17,7 +17,7 @@ import { generateLoginSuccessEmailHtml } from "../utils/email.utils";
 const folder = "/profile_image";
 //! register
 export const register = catchAsync(async (req: Request, res: Response) => {
-  const { full_name, email, password, phone, role } = req.body;
+  const { full_name, email, password, phone } = req.body;
   const image = req.file;
   console.log(image);
   if (!full_name) {
@@ -34,7 +34,7 @@ export const register = catchAsync(async (req: Request, res: Response) => {
     throw new AppError("please provide a valid email address", 400);
   }
   //* create User instance
-  const user = new User({ full_name, email, password, phone, role });
+  const user = new User({ full_name, email, password, phone });
 
   //* hash password
   const hash = await hashPassword(password);
