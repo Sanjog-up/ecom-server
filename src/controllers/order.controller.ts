@@ -101,6 +101,15 @@ export const verifyKhaltiPayment = catchAsync(
       throw new AppError("Order not found", 404);
     }
 
+    //! check paid
+    if(order.paymentStatus === "Paid"){
+      return sendResponse(res, {
+        statusCode: 200,
+        message: "Paument already verified",
+        data: { order }
+      })
+    } 
+
     const result = await lookupKhaltiPayment(pidx);
 
     if (result.status !== "Completed") {
