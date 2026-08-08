@@ -231,19 +231,19 @@ export const update = catchAsync(async(req: Request, res: Response)=> {
 }
   if(brand){
      const proBrand = await Brand.findOne({ _id: brand});
-  if(!proBrand){
+  if(!proBrand)
     throw new AppError(`Brand not found`, 404);
-  }
+    product.brand = proBrand?._id;
   }
 
-  const { images, cover_images } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
+  const { images, cover_image } = (req.files as {[key: string]:Express.Multer.File[]}) ?? {};
 
   //  //* cover images
-  if(cover_images?.[0]){
+  if(cover_image?.[0]){
     if(product.cover_image?.public_id){
     await deleteFileFromCloudinary(product.cover_image.public_id);
     }
-    const { path, public_id } = await sendFileToCloudinary(cover_images[0], folders);
+    const { path, public_id } = await sendFileToCloudinary(cover_image[0], folders);
     product.cover_image = {path, public_id}
   }
 

@@ -22,7 +22,7 @@ export const authenticate = (roles?: Role[]) => {
         throw new AppError("Unauthorized. Access denied", 401);
       }
 
-      //! verify
+      //! verify jwt
       const decoded_data: any = verifyToken(access_token);
       if (!decoded_data) {
         throw new AppError("Unauthorized. Access denied", 401);
