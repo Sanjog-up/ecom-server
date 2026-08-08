@@ -22,7 +22,8 @@ router.get('/new-arrivals', getNewArrivals);
 router.get('/:id', getById);
 
 //? create
-router.post("/", 
+router.post("/",
+    authenticate(Only_Admins), 
     upload.fields([
     {
         name: "cover_image",
@@ -32,7 +33,7 @@ router.post("/",
         name: "images",
         maxCount: 5,
     },
-    ]), authenticate(Only_Admins), 
+    ]), 
     create); 
 
  //? remove
