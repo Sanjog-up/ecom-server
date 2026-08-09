@@ -1,5 +1,3 @@
-// crud user
-
 import { NextFunction, Request, Response} from "express";
 import User from "../models/user.model";
 
@@ -55,7 +53,7 @@ export const getById = async(req: Request,
     //* success response
     res.status(200).json({
         message: `User ${id} fetched`,
-        data: User,
+        data: user,
         succedd: true,
         status: "success"
     }); 
@@ -84,10 +82,11 @@ export const deleteUser = async(req: Request, res: Response, next: NextFunction)
         error.statusCode = 404;
         error.status = "fail";
         throw error;}
+        await user.deleteOne();
         //* success response
         res.status(200).json({
             message: `User ${id} deleted`,
-            data: User,
+            data: user,
         succedd: true,
         status: "success"
         });
