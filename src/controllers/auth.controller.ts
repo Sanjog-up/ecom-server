@@ -119,7 +119,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   }
 
   // * find user by email
-  const user = await User.findOne({ email: email });
+  const user = await User.findOne({ email: email }).select("+password");
   if (!user) {
     throw new AppError("email or password does not matched", 400);
   }
@@ -165,7 +165,7 @@ export const login = catchAsync(async (req: Request, res: Response) => {
   //* success response
   sendResponse(res, {
     message: "Login successful",
-    data: { user, access_token },
+    data: { user: payload, access_token },
     statusCode: 201,
   });
 });

@@ -205,3 +205,10 @@ const decrementStock = async (items: any[]) => {
         })
         )
       };
+
+
+//! cancelorder
+export const cancelOrder = catchAsync( async( req: Request, res: Response) => 
+{
+  const userId = req.user?._id;
+})
