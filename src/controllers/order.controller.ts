@@ -193,10 +193,15 @@ export const updateOrderStatus = catchAsync(
 //! decrement stock
 const decrementStock = async (items: any[]) => {
     await Promise.all(
-        items.map((item) =>
-            Product.findByIdAndUpdate(item.product, {
-                $inc: { stock: -item.quantity },
-            }),
-        ),
-    );
-};
+        items.map(async (item) => {
+          const updated = await Product.findByIdAndUpdate(
+            { _id: item.product, stock: { $gte: item.quantity}},
+            { $inc : { stock: -item.quantity }},
+            { new: true},
+          );
+          if(!updated){
+            throw new AppError(`Product is out of stock or insufficient quantity`, 400);
+          }
+        })
+        )
+      };
