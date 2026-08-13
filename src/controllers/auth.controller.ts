@@ -19,7 +19,7 @@ const folder = "/profile_image";
 export const register = catchAsync(async (req: Request, res: Response) => {
   const { full_name, email, password, phone } = req.body;
   const image = req.file;
-  console.log(image);
+
   if (!full_name) {
     throw new AppError("full_name is required", 400);
   }
@@ -33,8 +33,13 @@ export const register = catchAsync(async (req: Request, res: Response) => {
   if(!emailRegex.test(email)){
     throw new AppError("please provide a valid email address", 400);
   }
+  const existingUser = await User.findOne({ email: email.toLowerCae()});
+  if(existingUser){
+    throw new AppError("Email already registered", 400);
+  }
+
   //* create User instance
-  const user = new User({ full_name, email, password, phone });
+  const user = new User({ full_name, email: email.toLowerCase(), password, phone });
 
   //* hash password
   const hash = await hashPassword(password);
